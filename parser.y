@@ -1,5 +1,5 @@
 %{
-  
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +10,7 @@
 //------------------------------------------
 //--Fonctions de gestion de lenvironnement--
 //------------------------------------------
+
 
 typedef struct var_t * var;
 
@@ -104,7 +105,7 @@ var push_var(char *id, int k, var e)
 
 %%
 
-s : 
+s :
   | s e FIN_EXP {printf(">>> %d\n", $2);}
   ;
 
@@ -116,7 +117,7 @@ e : e '+' e       {$$ = $1 + $3;}
 
   | e POW e       {$$ = power($1, $3);}
   | '(' e ')'     {$$ = $2;}
-  
+
   | e AND e  {$$ = $1 && $3;}
   | e OR e   {$$ = $1 || $3;}
   | NOT e    {$$ = !$2;}
