@@ -11,7 +11,7 @@ if {return IF;}
 then {return THEN;}
 else {return ELSE;}
 
-[[:digit:]] {yylval.num = atoi(yytext); return NUM;}
+[[:digit:]] {yylval.num = atoi(yytext); return NB;}
 [[:alpha:]] {yylval.id= strdup(yytext); return ID;}
 
 [[:space:]] {;}

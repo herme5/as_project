@@ -6,11 +6,6 @@
 #include <unistd.h>
 #include <string.h>
 
-
-//------------------------------------------
-//--Fonctions de gestion de lenvironnement--
-//------------------------------------------
-
 typedef struct var_t * var;
 
 struct var_t{
@@ -21,6 +16,7 @@ struct var_t{
 
 var env = NULL;
 
+//----------------------------------------
 
 var find_var(char *id, var e)
 {
