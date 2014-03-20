@@ -6,17 +6,16 @@
 #include <unistd.h>
 #include <string.h>
 #include "machine.h"
-#include "expr.h"
 
-  struct env * env = NULL;
+  struct env * environment = NULL;
   struct configuration conf_concrete;
   struct configuration * conf = &conf_concrete;
 
 %}
 
-%token<num> NB
-%token<id> ID
-%token FIN_EXP
+%token<num> TNUM
+%token<id> TID
+%token FIN_EXPR
 %token LET
 %token IF
 %token THEN
@@ -35,7 +34,7 @@
 %token TOR
 %token TNOT
 
-%type<struct expr *> e
+%type<exxp> e
 
 %right TAND TOR TNOT
 %right TEQ TLE TLEQ TGE TGEQ
@@ -48,24 +47,25 @@
 %union{
   char *id;
   int num;
+  struct expr * exxp;
 }
 
 %%
 
 
 s :
-| s e FIN_EXP {conf->closure = mk_closure($2,env);
+| s e FIN_EXPR {conf->closure = mk_closure($2,environment);
    conf->stack=NULL;
    step(conf);
    if(conf->closure->expr->type==NUM)
      printf("Valeur : %d \n", conf->closure->expr->expr->num);
  }
-| LET TID '=' e FIN_EXP {env = push_rec_env($2,$4,env)
-      conf->closure = mk_closure($4,env);
+| LET TID '=' e FIN_EXPR {environment = push_rec_env($2,$4,environment);
+      conf->closure = mk_closure($4,environment);
    conf->stack=NULL;
    step(conf);
    if(conf->closure->expr->type==NUM)
-     printf("Valeur de %s : %d \n",$2, conf->closure->expr->expr->num)}
+     printf("Valeur de %s : %d \n",$2, conf->closure->expr->expr->num);}
 ;
 
 
@@ -76,9 +76,9 @@ e : e '+' e       {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 
 | '(' e ')'     {$$ = $2;}
 
-| e TAND e  {$$ mk_app(mk_app(mk_op(AND),$1),$3);}
-| e TOR e   {$$ mk_app(mk_app(mk_op(OR),$1),$3);}
-| TNOT e    {$$ mk_app(mk_op(NOT),$2);}
+| e TAND e  {$$ = mk_app(mk_app(mk_op(AND),$1),$3);}
+| e TOR e   {$$ = mk_app(mk_app(mk_op(OR),$1),$3);}
+| TNOT e    {$$ = mk_app(mk_op(NOT),$2);}
 
 | e TLE e {$$ = mk_app(mk_app(mk_op(LE),$1),$3);}
 | e TLEQ e {$$ = mk_app(mk_app(mk_op(LEQ),$1),$3);}
@@ -86,7 +86,7 @@ e : e '+' e       {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | e TGEQ e {$$ = mk_app(mk_app(mk_op(GEQ),$1),$3);}
 | e TEQ e {$$ = mk_app(mk_app(mk_op(EQ),$1),$3);}
 | TNUM {$$ = mk_int($1);}
-| '-' e %prec NEG {$$ = mk_int(-$2);} 
+| '-' TNUM %prec NEG {$$ = mk_int(-$2);}
 
 | '(' IF e THEN e ELSE e ')' {$$ = mk_cond($3,$5,$7);}
 | '(' e e ')' {$$ = mk_app($2,$3);}

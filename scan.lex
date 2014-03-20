@@ -1,22 +1,22 @@
 %{
-#include "machine.h"
-#include "expr.h"
 #include "parser.tab.h"
 %}
+
 %option noyywrap
 %%
 
-let {return LET;}
-if {return IF;}
+let  {return LET;}
+if   {return IF;}
 then {return THEN;}
 else {return ELSE;}
-fun {return TFUN;}
+fun  {return TFUN;}
 
-[[:digit:]] {yylval.num = atoi(yytext); return TNUM;}
-[[:alpha:]] {yylval.id= strdup(yytext); return TID;}
+[[:digit:]]+ {yylval.num = atoi(yytext); return TNUM;}
+[[:alpha:]]+ {yylval.id= strdup(yytext); return TID;}
 
 [[:space:]] {;}
-"->" {return ARROW;]
+"->" {return ARROW;}
+
 
 "<"  {return TLE;}
 ">"  {return TGE;}
@@ -28,7 +28,5 @@ fun {return TFUN;}
 "||" {return TOR;}
 "!"  {return TNOT;}
 
-[+-*/=()] {return yytext[0];}
+[+\-*/=()] {return yytext[0];}
 ; {return FIN_EXPR;}
-
-%%
