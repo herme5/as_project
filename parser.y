@@ -39,6 +39,7 @@
 %right TAND TOR TNOT
 %right TEQ TLE TLEQ TGE TGEQ
 %right '='
+%right LET TID TNUM
 %left '+' '-'
 %left '*' '/'
 %nonassoc NEG
@@ -60,12 +61,12 @@ s :
    if(conf->closure->expr->type==NUM)
      printf("Valeur : %d \n", conf->closure->expr->expr->num);
  }
-| LET TID '=' e FIN_EXPR {environment = push_rec_env($2,$4,environment);
-      conf->closure = mk_closure($4,environment);
+| s LET TID[var] '=' e[expr] FIN_EXPR {environment = push_rec_env($var,$expr,environment);
+      conf->closure = mk_closure($expr,environment);
    conf->stack=NULL;
    step(conf);
    if(conf->closure->expr->type==NUM)
-     printf("Valeur de %s : %d \n",$2, conf->closure->expr->expr->num);}
+     printf("Valeur de %s : %d \n",$var, conf->closure->expr->expr->num);}
 ;
 
 
@@ -88,9 +89,9 @@ e : e '+' e       {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | TNUM {$$ = mk_int($1);}
 | '-' TNUM %prec NEG {$$ = mk_int(-$2);}
 
-| '(' IF e THEN e ELSE e ')' {$$ = mk_cond($3,$5,$7);}
+| IF e THEN e ELSE e {$$ = mk_cond($2,$4,$6);}
 | '(' e e ')' {$$ = mk_app($2,$3);}
-| '(' TFUN TID ARROW e ')' {$$ = mk_fun($3,$5);}
+| TFUN TID ARROW e {$$ = mk_fun($2,$4);}
 | TID {$$=mk_id($1);}
 
 ;
