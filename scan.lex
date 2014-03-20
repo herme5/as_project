@@ -10,28 +10,25 @@ let {return LET;}
 if {return IF;}
 then {return THEN;}
 else {return ELSE;}
+fun {return TFUN;}
 
-[[:digit:]] {yylval.num = atoi(yytext); return NB;}
-[[:alpha:]] {yylval.id= strdup(yytext); return ID;}
+[[:digit:]] {yylval.num = atoi(yytext); return TNUM;}
+[[:alpha:]] {yylval.id= strdup(yytext); return TID;}
 
 [[:space:]] {;}
+"->" {return ARROW;]
 
-"+"  {return PLUS;}
-"-"  {return MINUS;}
-"*"  {return MULT;}
-"/"  {return DIV;}
+"<"  {return TLE;}
+">"  {return TGE;}
+"<=" {return TLEQ;}
+">=" {return TGEQ;}
+"==" {return TEQ;}
 
-"<"  {return LE;}
-">"  {return GE;}
-"<=" {return LEQ;}
-">=" {return GEQ;}
-"==" {return EQ;}
+"&&" {return TAND;}
+"||" {return TOR;}
+"!"  {return TNOT;}
 
-"&&" {return AND;}
-"||" {return OR;}
-"!"  {return NOT;}
-
-[=()] {return yytext[0];}
+[+-*/=()] {return yytext[0];}
 ; {return FIN_EXPR;}
 
 %%

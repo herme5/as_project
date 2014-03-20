@@ -5,97 +5,44 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include "machine.h"
+#include "expr.h"
 
-
-//------------------------------------------
-//--Fonctions de gestion de lenvironnement--
-//------------------------------------------
-
-
-typedef struct var_t * var;
-
-struct var_t{
-  char *id;
-  int val;
-  var next;
-};
-
-var env = NULL;
-
-
-var find_var(char *id, var e)
-{
-  if(e == NULL){
-    return NULL;
-  }
-
-  if (!strcmp(id, e->id))
-    return e;
-  else
-    return find_var(id,e->next);
-}
-
-int get_var(char *id, var e)
-{
-  var tmp = find_var(id, e);
-  if (tmp == NULL){
-    return 0;
-  }
-  return tmp->val;
-}
-
-var add_var(char *id, int k, var e)
-{
-  var new = malloc(sizeof(*new));
-  new->id = id;
-  new->val = k;
-  new->next = e;
-  return new;
-}
-
-var push_var(char *id, int k, var e)
-{
-  var tmp = find_var(id, e);
-  if (tmp == NULL){
-    return add_var(id, k, e);
-  }
-  else {
-    tmp->val = k;
-    return tmp;
-  }
-}
-
-//---------------------------------------
+  struct env * env = NULL;
+  struct configuration conf_concrete;
+  struct configuration * conf = &conf_concrete;
 
 %}
 
 %token<num> NB
 %token<id> ID
 %token FIN_EXP
-%token POW
+%token LET
+%token IF
+%token THEN
+%token ELSE
+%token TFUN
+%token ARROW
 
-%token EQ
-%token DIF
-%token LS
-%token LEQ
-%token GR
-%token GEQ
+%token TEQ
+%token TDIF
+%token TLS
+%token TLEQ
+%token TGR
+%token TGEQ
 
-%token AND
-%token OR
-%token NOT
+%token TAND
+%token TOR
+%token TNOT
 
-%type<num> e
+%type<struct expr *> e
 
-%right '?' ':'
-%right AND OR NOT
-%right EQ DIF LS LEQ GR GEQ
+%right TAND TOR TNOT
+%right TEQ TLE TLEQ TGE TGEQ
 %right '='
 %left '+' '-'
 %left '*' '/'
-%right '%'
 %nonassoc NEG
-%right POW
 
 
 %union{
@@ -105,37 +52,49 @@ var push_var(char *id, int k, var e)
 
 %%
 
+
 s :
-  | s e FIN_EXP {printf(">>> %d\n", $2);}
-  ;
+| s e FIN_EXP {conf->closure = mk_closure($2,env);
+   conf->stack=NULL;
+   step(conf);
+   if(conf->closure->expr->type==NUM)
+     printf("Valeur : %d \n", conf->closure->expr->expr->num);
+ }
+| LET TID '=' e FIN_EXP {env = push_rec_env($2,$4,env)
+      conf->closure = mk_closure($4,env);
+   conf->stack=NULL;
+   step(conf);
+   if(conf->closure->expr->type==NUM)
+     printf("Valeur de %s : %d \n",$2, conf->closure->expr->expr->num)}
+;
 
-e : e '+' e       {$$ = $1 + $3;}
-  | e '-' e       {$$ = $1 - $3;}
-  | e '/' e       {$$ = $1 / $3;}
-  | e '*' e       {$$ = $1 * $3;}
-  | e '%' e       {$$ = $1 % $3;}
 
-  | e POW e       {$$ = power($1, $3);}
-  | '(' e ')'     {$$ = $2;}
+e : e '+' e       {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
+| e '-' e       {$$ = mk_app(mk_app(mk_op(MINUS),$1),$3);}
+| e '/' e       {$$ = mk_app(mk_app(mk_op(DIV),$1),$3);}
+| e '*' e       {$$ = mk_app(mk_app(mk_op(MULT),$1),$3);}
 
-  | e AND e  {$$ = $1 && $3;}
-  | e OR e   {$$ = $1 || $3;}
-  | NOT e    {$$ = !$2;}
+| '(' e ')'     {$$ = $2;}
 
-  | e LS e {if($1 < $3){$$ = 1;}else{$$ = 0;}}
-  | e LEQ e {if($1 <= $3){$$ = 1;}else{$$ = 0;}}
-  | e GR e {if($1 > $3){$$ = 1;}else{$$ = 0;}}
-  | e GEQ e {if($1 >= $3){$$ = 1;}else{$$ = 0;}}
-  | e EQ e {if($1 == $3){$$ = 1;}else{$$ = 0;}}
-  | e DIF e {if($1 != $3){$$ = 1;}else{$$ = 0;}}
+| e TAND e  {$$ mk_app(mk_app(mk_op(AND),$1),$3);}
+| e TOR e   {$$ mk_app(mk_app(mk_op(OR),$1),$3);}
+| TNOT e    {$$ mk_app(mk_op(NOT),$2);}
 
-  | e '?' e ':' e {if($1){$$ = $3;}else{$$ = $5;}}
+| e TLE e {$$ = mk_app(mk_app(mk_op(LE),$1),$3);}
+| e TLEQ e {$$ = mk_app(mk_app(mk_op(LEQ),$1),$3);}
+| e TGE e {$$ = mk_app(mk_app(mk_op(GE),$1),$3);}
+| e TGEQ e {$$ = mk_app(mk_app(mk_op(GEQ),$1),$3);}
+| e TEQ e {$$ = mk_app(mk_app(mk_op(EQ),$1),$3);}
+| TNUM {$$ = mk_int($1);}
+| '-' e %prec NEG {$$ = mk_int(-$2);} 
 
-  | ID '=' e        {env = push_var($1, $3, env); $$ = $3;}
-  | ID              {$$ = get_var($1, env);}
-  | NB              {$$ = $1;}
-  | '-' e %prec NEG {$$ = -$2;}
-  ;
+| '(' IF e THEN e ELSE e ')' {$$ = mk_cond($3,$5,$7);}
+| '(' e e ')' {$$ = mk_app($2,$3);}
+| '(' TFUN TID ARROW e ')' {$$ = mk_fun($3,$5);}
+| TID {$$=mk_id($1);}
+
+;
+
 
 %%
 
