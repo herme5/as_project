@@ -39,6 +39,7 @@
 %type<exxp> p
 %type<exxp> f
 
+%right IN
 %right ARROW ELSE
 %right TAND TOR TNOT
 %right TEQ TLE TLEQ TGE TGEQ
@@ -71,12 +72,12 @@ s :
    step(conf);
    if(conf->closure->expr->type==NUM)
      printf("Valeur de %s : %d \n",$var, conf->closure->expr->expr->num);}
-| s LET TID[var] '=' e[expr1] IN e[expr2] FIN_EXPR {
+/*| s LET TID[var] '=' e[expr1] IN e[expr2] FIN_EXPR {
 conf->closure = mk_closure(mk_app(mk_fun($var,$expr2),$expr1),environment);
    conf->stack=NULL;
    step(conf);
    if(conf->closure->expr->type==NUM)
-     printf("Valeur : %d \n", conf->closure->expr->expr->num);}
+     printf("Valeur : %d \n", conf->closure->expr->expr->num);}*/
 ;
 
 
@@ -104,8 +105,12 @@ e : e '+' e       {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | '(' e e ')' {$$ = mk_app($2,$3);}
 | f e ')' {$$ = mk_app($1,$2);}
 | TID {$$=mk_id($1);}
+
 /*FONCTION AVEC PLUSIEURS PARAMETRES*/
 | TFUN TID p {$$ = mk_fun ($2,$3);}
+
+/* LET IN */
+| LET TID[var] '=' e[expr1] IN e[expr2] {$$ = mk_app(mk_fun($var,$expr2),$expr1);}
 
 ;
 /* TFUN TID[1] TID[2] ARROW e -> TFUN TID[1] ARROW mkfun(TID[2], e)*/
