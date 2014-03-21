@@ -23,6 +23,7 @@
 %token TFUN
 %token ARROW
 %token IN
+%token WHERE
 
 %token TEQ
 %token TDIF
@@ -39,6 +40,7 @@
 %type<exxp> p
 %type<exxp> f
 
+%left WHERE
 %right IN
 %right ARROW ELSE
 %right TAND TOR TNOT
@@ -111,6 +113,9 @@ e : e '+' e       {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 
 /* LET IN */
 | LET TID[var] '=' e[expr1] IN e[expr2] {$$ = mk_app(mk_fun($var,$expr2),$expr1);}
+
+/* WHERE */
+| e[expr2] WHERE TID[var] '=' e[expr1] {$$ = mk_app(mk_fun($var,$expr2),$expr1);}
 
 ;
 /* TFUN TID[1] TID[2] ARROW e -> TFUN TID[1] ARROW mkfun(TID[2], e)*/
