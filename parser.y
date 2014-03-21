@@ -36,13 +36,14 @@
 
 %type<exxp> e
 
+%right ARROW ELSE
 %right TAND TOR TNOT
 %right TEQ TLE TLEQ TGE TGEQ
 %right '='
 %right LET TID TNUM
 %left '+' '-'
 %left '*' '/'
-%nonassoc NEG
+/* %nonassoc NEG */
 
 
 %union{
@@ -87,11 +88,11 @@ e : e '+' e       {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | e TGEQ e {$$ = mk_app(mk_app(mk_op(GEQ),$1),$3);}
 | e TEQ e {$$ = mk_app(mk_app(mk_op(EQ),$1),$3);}
 | TNUM {$$ = mk_int($1);}
-| '-' TNUM %prec NEG {$$ = mk_int(-$2);}
+/* | '-' TNUM %prec NEG {$$ = mk_int(-$2);} */
 
 | IF e THEN e ELSE e {$$ = mk_cond($2,$4,$6);}
-| '(' e e ')' {$$ = mk_app($2,$3);}
 | TFUN TID ARROW e {$$ = mk_fun($2,$4);}
+| '(' e e ')' {$$ = mk_app($2,$3);}
 | TID {$$=mk_id($1);}
 
 ;
