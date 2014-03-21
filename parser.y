@@ -35,6 +35,8 @@
 %token TNOT
 
 %type<exxp> e
+%type<exxp> p
+%type<exxp> f
 
 %right ARROW ELSE
 %right TAND TOR TNOT
@@ -93,9 +95,19 @@ e : e '+' e       {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | IF e THEN e ELSE e {$$ = mk_cond($2,$4,$6);}
 | TFUN TID ARROW e {$$ = mk_fun($2,$4);}
 | '(' e e ')' {$$ = mk_app($2,$3);}
+| f e ')' {$$ = mk_app($1,$2);}
 | TID {$$=mk_id($1);}
+/*FONCTION AVEC PLUSIEURS PARAMETRES*/
+| TFUN TID p {$$ = mk_fun ($2,$3);}
 
 ;
+/* TFUN TID[1] TID[2] ARROW e -> TFUN TID[1] ARROW mkfun(TID[2], e)*/
+
+p : TID ARROW e {$$ = mk_fun ($1,$3);}
+| TID p {$$ = mk_fun ($1, $2);}
+
+f : '(' e e {$$ = mk_app($2, $3);}
+| f e {$$ = mk_app($1,$2);}
 
 
 %%
