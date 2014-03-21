@@ -10,6 +10,7 @@ if   {return IF;}
 then {return THEN;}
 else {return ELSE;}
 fun  {return TFUN;}
+in   {return IN;}
 
 [[:digit:]]+ {yylval.num = atoi(yytext); return TNUM;}
 [[:alpha:]]+ {yylval.id= strdup(yytext); return TID;}

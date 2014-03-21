@@ -22,6 +22,7 @@
 %token ELSE
 %token TFUN
 %token ARROW
+%token IN
 
 %token TEQ
 %token TDIF
@@ -70,6 +71,12 @@ s :
    step(conf);
    if(conf->closure->expr->type==NUM)
      printf("Valeur de %s : %d \n",$var, conf->closure->expr->expr->num);}
+| s LET TID[var] '=' e[expr1] IN e[expr2] FIN_EXPR {
+conf->closure = mk_closure(mk_app(mk_fun($var,$expr2),$expr1),environment);
+   conf->stack=NULL;
+   step(conf);
+   if(conf->closure->expr->type==NUM)
+     printf("Valeur : %d \n", conf->closure->expr->expr->num);}
 ;
 
 
