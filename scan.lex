@@ -5,30 +5,30 @@
 %option noyywrap
 %%
 
-let   {return LET;}
-if    {return IF;}
-then  {return THEN;}
-else  {return ELSE;}
-fun   {return TFUN;}
-in    {return IN;}
-where {return WHERE;}
+let   {return T_LET;}
+if    {return T_IF;}
+then  {return T_THEN;}
+else  {return T_ELSE;}
+fun   {return T_FUN;}
+in    {return T_IN;}
+where {return T_WHERE;}
 
-[[:digit:]]+ {yylval.num = atoi(yytext); return TNUM;}
-[[:alpha:]]+ {yylval.id= strdup(yytext); return TID;}
+[[:digit:]]+ {yylval.num = atoi(yytext); return T_NUM;}
+[[:alpha:]]+ {yylval.id= strdup(yytext); return T_ID;}
 
 [[:space:]] {;}
-"->" {return ARROW;}
+"->" {return T_ARROW;}
 
 
-"<"  {return TLE;}
-">"  {return TGE;}
-"<=" {return TLEQ;}
-">=" {return TGEQ;}
-"==" {return TEQ;}
+"<"  {return T_LE;}
+">"  {return T_GE;}
+"<=" {return T_LEQ;}
+">=" {return T_GEQ;}
+"==" {return T_EQ;}
 
-"&&" {return TAND;}
-"||" {return TOR;}
-"!"  {return TNOT;}
+"&&" {return T_AND;}
+"||" {return T_OR;}
+"!"  {return T_NOT;}
 
 [+\-*/=()] {return yytext[0];}
-; {return FIN_EXPR;}
+; {return EOE;}
