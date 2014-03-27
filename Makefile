@@ -5,7 +5,7 @@ YFLAGS=-d -v -t
 CC=gcc
 LDLIBS=-ly
 
-all: parser
+all: parser.result
 
 parser.tab.c: parser.y
 	$(YACC) $(YFLAGS) $<
@@ -13,8 +13,11 @@ parser.tab.c: parser.y
 scan.yy.c: scan.lex
 	$(LEX) -o $@ $<
 
-parser: parser.tab.c scan.yy.c machine.c expr.c
+parser.o: parser.tab.c scan.yy.c machine.c expr.c
 	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
+
+parser.result: parser.o exemples.input
+	./$< < $(word 2, $^) > $@ && cat $@
 
 .PHONY: clean
 
