@@ -13,6 +13,10 @@ fun   {return T_FUN;}
 in    {return T_IN;}
 where {return T_WHERE;}
 
+cons  {return T_CONS;}
+head  {return T_HEAD;}
+tail  {return T_TAIL;}
+
 [[:digit:]]+ {yylval.num = atoi(yytext); return T_NUM;}
 [[:alpha:]]+ {yylval.id= strdup(yytext); return T_ID;}
 
@@ -30,5 +34,5 @@ where {return T_WHERE;}
 "||" {return T_OR;}
 "!"  {return T_NOT;}
 
-[+\-*/=()] {return yytext[0];}
+[+\-*/=()\[\]] {return yytext[0];}
 ; {return EOE;}

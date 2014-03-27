@@ -25,6 +25,10 @@ struct configuration * conf = &conf_concrete;
 %token T_IN
 %token T_WHERE
 
+%token T_CONS
+%token T_TAIL
+%token T_HEAD
+
 %token T_EQ
 %token T_DIF
 %token T_LE
@@ -39,6 +43,7 @@ struct configuration * conf = &conf_concrete;
 %type<t_exp> e
 %type<t_exp> p
 %type<t_exp> f
+%type<t_exp> l
 
 %left T_WHERE
 %right T_IN
@@ -109,6 +114,7 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | T_FUN T_ID T_ARROW e     {$$ = mk_fun($2,$4);}
 | '(' e e ')'              {$$ = mk_app($2,$3);}
 | f e ')'                  {$$ = mk_app($1,$2);}
+| l ']'                    {$$ = mk_cons($1,NULL);}
 | T_ID                     {$$=mk_id($1);}
 
 /*FONCTION AVEC PLUSIEURS PARAMETRES*/
@@ -119,6 +125,8 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 
 /* WHERE */
 | e[expr2] T_WHERE T_ID[var] '=' e[expr1] {$$ = mk_app(mk_fun($var,$expr2),$expr1);}
+
+| T_CONS l[list] e[expr] {$$ = mk_cons($list, $expr);}
 ;
 
 /* | T_LET T_ID '=' e { */
@@ -135,6 +143,12 @@ p : T_ID T_ARROW e {$$ = mk_fun ($1,$3);}
 
 f : '(' e e {$$ = mk_app($2, $3);}
 | f e       {$$ = mk_app($1,$2);}
+
+
+
+l : '[' e e {$$ = mk_cell($2, $3);}
+| l e       {$$ = mk_cons($1, $2);}
+
 
 
 %%
