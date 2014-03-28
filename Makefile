@@ -13,10 +13,10 @@ parser.tab.c: parser.y
 scan.yy.c: scan.lex
 	$(LEX) -o $@ $<
 
-parser.o: parser.tab.c scan.yy.c machine.c expr.c
+parser: parser.tab.c scan.yy.c machine.c expr.c
 	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
 
-parser.result: parser.o exemples.input
+parser.result: parser exemples.input
 	./$< < $(word 2, $^) > $@ && cat $@
 
 .PHONY: clean

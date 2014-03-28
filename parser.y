@@ -43,7 +43,8 @@ struct configuration * conf = &conf_concrete;
 %type<t_exp> e
 %type<t_exp> p
 %type<t_exp> f
-%type<t_exp> l
+//TODO%type<t_exp> l
+//TODO%type<t_exp> list
 
 %left T_WHERE
 %right T_IN
@@ -51,11 +52,12 @@ struct configuration * conf = &conf_concrete;
 %right T_AND T_OR T_NOT
 %right T_EQ T_LE T_LEQ T_GE T_GEQ
 %right '='
+%right T_CONS
 %right T_LET T_ID T_NUM
 %right EOE
 %left '+' '-'
 %left '*' '/'
-/* %nonassoc NEG */
+%nonassoc NEG
 
 %union{
   char *id;
@@ -96,6 +98,9 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | e '/' e     {$$ = mk_app(mk_app(mk_op(DIV),$1),$3);}
 | e '*' e     {$$ = mk_app(mk_app(mk_op(MULT),$1),$3);}
 
+| '(' '-' e ')' {$$ = mk_app(mk_app(mk_op(MINUS),mk_int(0)),$3);}
+
+
 | '(' e ')'   {$$ = $2;}
 
 | e T_AND e   {$$ = mk_app(mk_app(mk_op(AND),$1),$3);}
@@ -109,12 +114,10 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | e T_EQ e    {$$ = mk_app(mk_app(mk_op(EQ),$1),$3);}
 | T_NUM       {$$ = mk_int($1);}
 
-/* | '-' TNUM %prec NEG {$$ = mk_int(-$2);} */
 | T_IF e T_THEN e T_ELSE e {$$ = mk_cond($2,$4,$6);}
 | T_FUN T_ID T_ARROW e     {$$ = mk_fun($2,$4);}
 | '(' e e ')'              {$$ = mk_app($2,$3);}
 | f e ')'                  {$$ = mk_app($1,$2);}
-| l ']'                    {$$ = mk_cons($1,NULL);}
 | T_ID                     {$$=mk_id($1);}
 
 /*FONCTION AVEC PLUSIEURS PARAMETRES*/
@@ -126,7 +129,10 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 /* WHERE */
 | e[expr2] T_WHERE T_ID[var] '=' e[expr1] {$$ = mk_app(mk_fun($var,$expr2),$expr1);}
 
-| T_CONS l[list] e[expr] {$$ = mk_cons($list, $expr);}
+//TODO| T_CONS list e[expr] {$$ = mk_cons($expr, $2);}
+//TODO| list {$$=$1;}
+//TODO| T_HEAD list {$$=mk_head($2);}
+//TODO| T_TAIL list {$$=mk_tail($2);}//TODO : VOIR FONCTIONS
 ;
 
 /* | T_LET T_ID '=' e { */
@@ -146,8 +152,10 @@ f : '(' e e {$$ = mk_app($2, $3);}
 
 
 
-l : '[' e e {$$ = mk_cell($2, $3);}
-| l e       {$$ = mk_cons($1, $2);}
+//TODOl : ']'     {$$ = mk_cell(NULL, NULL);}
+//TODO| e l      {$$ = mk_cons($1, $2);}
+
+//TODOlist: '[' l   {$$ = mk_cons(NULL,$2);}
 
 
 
