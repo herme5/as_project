@@ -1,13 +1,18 @@
 
-enum expr_kind {ID, FUN, APP, NUM, OP, COND};
+enum expr_kind {ID, FUN, APP, NUM, OP, COND, LIST, NIL};
 
-enum op{PLUS, MINUS, MULT, DIV, LEQ, LE, GEQ, GE, EQ, OR, AND, NOT};
+enum op{PLUS, MINUS, MULT, DIV, LEQ, LE, GEQ, GE, EQ, OR, AND, NOT, CONS, HEAD, TAIL};
 
 struct expr;
 
 struct fun{
   char *id;
   struct expr *body;
+};
+
+struct cell{
+  struct expr *e;
+  struct cell *next;
 };
 
 struct app{
@@ -28,6 +33,7 @@ union node{
   enum op op;
   int num;
   struct cond cond;
+  struct cell *cell;
 };
 
 struct expr{
@@ -35,6 +41,8 @@ struct expr{
   union node *expr;
 };
 
+struct expr *mk_cell(struct expr * e, struct cell * next);
+struct expr *mk_cons(struct expr * e, struct cell * next);
 struct expr *mk_node(void);
 struct expr *mk_id(char *id);
 struct expr *mk_fun(char *id, struct expr *body);

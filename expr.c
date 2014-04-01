@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include "expr.h"
 
+//struct expr nil_cr;
+//nil_cr->type = NIL;
+//nil_cr->expr = NULL;
+//struct expr *nil = &nil_cr;
+
 struct expr *mk_node(void){
   struct expr *e = malloc(sizeof(struct expr));
   e->expr = malloc(sizeof(union node));
@@ -52,5 +57,18 @@ struct expr *mk_cond(struct expr *cond, struct expr *then_br, struct expr *else_
   e->expr->cond.cond = cond;
   e->expr->cond.then_br = then_br;
   e->expr->cond.else_br = else_br;
+  return e;
+}
+
+struct expr *mk_cell(struct expr *cell, struct cell *next){
+  struct expr *e = mk_node();
+  e->type = LIST;
+  e->expr->cell->e = cell;
+  e->expr->cell->next = next;
+  return e;
+}
+
+struct expr *mk_cons(struct expr *exp, struct cell *next){
+  struct expr *e = mk_node();
   return e;
 }

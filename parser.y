@@ -73,16 +73,24 @@ s :
   conf->closure = mk_closure($2,environment);
   conf->stack=NULL;
   step(conf);
-  if(conf->closure->expr->type==NUM)
-    printf(">>> %d \n", conf->closure->expr->expr->num);}
+  switch(conf->closure->expr->type){
+  case NUM:  printf(">>> %d \n", conf->closure->expr->expr->num); break;
+  case LIST: printf(">>> "); print_list(conf->closure->expr->expr->cell); printf("\n"); break;
+  default:   break;
+  }
+}
 
 | s T_LET T_ID[var] '=' e[expr] EOE {
   environment = push_rec_env($var,$expr,environment);
   conf->closure = mk_closure($expr,environment);
   conf->stack=NULL;
   step(conf);
-  if(conf->closure->expr->type==NUM)
-    printf(">>> %d \n", conf->closure->expr->expr->num);}
+  switch(conf->closure->expr->type){
+  case NUM:  printf(">>> %d \n", conf->closure->expr->expr->num); break;
+  case LIST: printf(">>> "); print_list(conf->closure->expr->expr->cell); printf("\n"); break;
+  default:   break; 
+  }
+}
 
 /*| s T_LET T_ID[var] '=' e[expr1] T_IN e[expr2] EOE {
   conf->closure = mk_closure(mk_app(mk_fun($var,$expr2),$expr1),environment);
@@ -99,9 +107,7 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | e '*' e     {$$ = mk_app(mk_app(mk_op(MULT),$1),$3);}
 
 | '(' '-' e ')' {$$ = mk_app(mk_app(mk_op(MINUS),mk_int(0)),$3);}
-
-
-| '(' e ')'   {$$ = $2;}
+| '(' e ')'     {$$ = $2;}
 
 | e T_AND e   {$$ = mk_app(mk_app(mk_op(AND),$1),$3);}
 | e T_OR e    {$$ = mk_app(mk_app(mk_op(OR),$1),$3);}
@@ -146,10 +152,11 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 
 p : T_ID T_ARROW e {$$ = mk_fun ($1,$3);}
 | T_ID p           {$$ = mk_fun ($1, $2);}
+;
 
 f : '(' e e {$$ = mk_app($2, $3);}
 | f e       {$$ = mk_app($1,$2);}
-
+;
 
 
 //TODOl : ']'     {$$ = mk_cell(NULL, NULL);}
