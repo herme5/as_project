@@ -34,5 +34,5 @@ tail  {return T_TAIL;}
 "||" {return T_OR;}
 "!"  {return T_NOT;}
 
-[+\-*/=()\[\]] {return yytext[0];}
+[+\-*/=()\[\]\%,] {return yytext[0];}
 ; {return EOE;}
