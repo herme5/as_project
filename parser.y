@@ -28,6 +28,7 @@ struct configuration * conf = &conf_concrete;
 %token T_CONS
 %token T_TAIL
 %token T_HEAD
+%token T_APPEND
 
 %token T_EQ
 %token T_DIF
@@ -89,7 +90,7 @@ s :
   switch(conf->closure->expr->type){
   case NUM:  printf(">>> %d \n", conf->closure->expr->expr->num); break;
   case CELL: printf(">>> "); print_list(&(conf->closure->expr->expr->cell)); printf("\n"); break;
-  default:   break; 
+  default:   break;
   }
 }
 ;
@@ -130,10 +131,11 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 /* WHERE */
 | e[expr2] T_WHERE T_ID[var] '=' e[expr1] {$$ = mk_app(mk_fun($var,$expr2),$expr1);}
 
-//TODO| T_CONS list e[expr] {$$ = mk_cons($expr, $2);}
+| T_CONS e[expr] e[list] {$$ = mk_app(mk_app(mk_op(CONS),$expr), $list);}
 | list {$$=$1;}
-//TODO| T_HEAD list {$$=mk_head($2);}
-//TODO| T_TAIL list {$$=mk_tail($2);}//TODO : VOIR FONCTIONS
+//TODO | T_HEAD e {$$=mk_head($2);}
+//TODO | T_TAIL e {$$=mk_tail($2);}
+//TODO | T_APPEND e e {}
 ;
 
 /* | T_LET T_ID '=' e { */
@@ -155,10 +157,10 @@ f : '(' e e {$$ = mk_app($2, $3);}
 
 list: '[' l {$$ = $2;}
 
-l : 
-e ']'       {$$ = mk_app(mk_app(mk_op(CONS),$1),get_nil());}
+l :
+e ']'       {$$ = mk_app(mk_app(mk_op(CONS),$1),mk_cell(NULL, NULL));}
 | e',' l    {$$ = mk_app(mk_app(mk_op(CONS),$1),$3);}
-|']'        {$$ = get_nil();}
+|']'        {$$ = mk_cell(NULL, NULL);}
 
 
 %%

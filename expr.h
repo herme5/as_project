@@ -11,8 +11,8 @@ struct fun{
 };
 
 struct cell{
-  struct expr *e;
-  struct expr *next;
+  struct expr *car;
+  struct cell *cdr;
 };
 
 struct app{
@@ -41,10 +41,8 @@ struct expr{
   union node *expr;
 };
 
-struct expr * nil;
 
-
-struct expr *mk_cell(struct expr * e, struct expr * next);
+struct expr *mk_cell(struct expr * car, struct cell * cdr);
 struct expr *mk_node(void);
 struct expr *mk_id(char *id);
 struct expr *mk_fun(char *id, struct expr *body);

@@ -16,6 +16,7 @@ where {return T_WHERE;}
 cons  {return T_CONS;}
 head  {return T_HEAD;}
 tail  {return T_TAIL;}
+append {return T_APPEND;}
 
 [[:digit:]]+ {yylval.num = atoi(yytext); return T_NUM;}
 [[:alpha:]]+ {yylval.id= strdup(yytext); return T_ID;}

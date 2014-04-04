@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include "expr.h"
+#include <stdio.h>
 
 struct expr *mk_node(void){
   struct expr *e = malloc(sizeof(struct expr));
@@ -55,20 +56,10 @@ struct expr *mk_cond(struct expr *cond, struct expr *then_br, struct expr *else_
   return e;
 }
 
-struct expr *mk_cell(struct expr *e, struct expr *next){
+struct expr *mk_cell(struct expr *car, struct cell *cdr){
   struct expr *res = mk_node();
   res->type = CELL;
-  res->expr->cell.e = e;
-  res->expr->cell.next = next;
+  res->expr->cell.car = car;
+  res->expr->cell.cdr = cdr;
   return res;
 }
-
-struct expr * get_nil(){
-  if(!nil){
-    nil=malloc(sizeof(struct expr));
-    nil->type=CELL;
-    nil->expr=NULL;
-  }
-  return nil;
-}
-

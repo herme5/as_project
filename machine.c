@@ -52,7 +52,7 @@ struct env *push_rec_env(char *id, struct expr *expr, struct env *env){
 struct closure *search_env(char *id, struct env *env){
   assert(env!=NULL);
   if(strcmp(id,env->id)==0){return env->closure;}
-  else{return search_env(id,env->next);}  
+  else{return search_env(id,env->next);}
 }
 
 struct stack *pop_stack(struct stack *stack){
@@ -72,12 +72,12 @@ void print_list(struct cell *list){
   printf("{");
   struct cell *tmp = list;
   if (tmp != NULL){
-    while(tmp->next != NULL){
-      printf("%d ;",tmp->e->expr->num);
-      tmp = &(tmp->next->expr->cell);
+    while(tmp->cdr != NULL){
+      printf("%d ",tmp->car->expr->num);
+      tmp = (tmp->cdr);
     }
-    printf("}");
   }
+  printf("}\n");
 }
 
 
@@ -99,7 +99,7 @@ void step(struct configuration *conf){
   struct stack *stack = conf->stack;
   assert(expr!=NULL);
   switch (expr->type){
-  case FUN: 
+  case FUN:
     {// printf("fun\n");
       if(stack==NULL){return;}
       char *var = expr->expr->fun.id;
@@ -109,8 +109,8 @@ void step(struct configuration *conf){
       conf->stack = pop_stack(stack);
       return step(conf);
     }
-  case APP: 
-    { 
+  case APP:
+    {
       struct expr *fun = expr->expr->app.fun;
       struct expr *arg = expr->expr->app.arg;
       conf->closure = mk_closure(fun,env);
@@ -122,7 +122,7 @@ void step(struct configuration *conf){
     conf->closure = search_env(expr->expr->id,env);
     return step(conf);
   case COND:
-    { 
+    {
       struct stack *stack = conf->stack;
       struct closure *cl_cond = mk_closure(expr->expr->cond.cond,env);
       conf->closure = cl_cond;
@@ -139,15 +139,15 @@ void step(struct configuration *conf){
       }
       return step(conf);
     }
-  case NUM: 
+  case NUM:
     return;
   case CELL:
     return;
-  case OP: 
+  case OP:
     {
       printf("1\n");
       struct stack *stack = conf->stack;
-      
+
       if(stack == NULL){return;}
       printf("2\n");
       struct closure *arg1 = stack->closure;
@@ -158,6 +158,7 @@ void step(struct configuration *conf){
       printf("3\n");
       int k1, k2;
       struct expr * e1 = conf->closure->expr;
+      printf("e = %d\n", e1->expr->num);
       struct cell c1, c2;
       if(conf->closure->expr->type==NUM){
 	printf("4\n");
@@ -173,10 +174,10 @@ void step(struct configuration *conf){
 	switch(expr->expr->op){
 	case HEAD: conf->closure->expr->expr->cell = c1; return;
 	case TAIL: conf->closure->expr->expr->cell = c1; return;
-	default: ; 
+	default: ;
 	}
       }
-      
+
       if(stack == NULL){return;}
       printf("6\n");
       arg1=conf->closure;
@@ -209,8 +210,12 @@ void step(struct configuration *conf){
       if(conf->closure->expr->type==CELL){
 	printf("9\n");
 	c2 = get_cell(conf);
+    printf("10\n");
+
+    print_list(&c2);
+
 	switch (expr->expr->op){
-	case CONS:  conf->closure = mk_closure(mk_cell(e1,c2.e), NULL); return;
+       case CONS:  conf->closure = mk_closure(mk_cell(e1,&c2),NULL); return; //TODO
 	default:    assert(0);
 	}
       }
