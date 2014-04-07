@@ -73,11 +73,58 @@ void print_list(struct expr *list){
   struct expr *tmp = list;
   if (tmp != NULL){
     while(tmp->expr->cell.cdr != NULL){
-      printf("%d ",tmp->expr->cell.car->expr->num);
+      print_expr(tmp->expr->cell.car);
       tmp = (tmp->expr->cell.cdr);
+      if (tmp->expr->cell.car != NULL){
+	printf(", ");
+      }
     }
   }
-  printf("}\n");
+  printf("}");
+}
+
+void print_expr(struct expr *expr){
+  switch(expr->type){
+  case CELL: print_list(expr);return;
+  case NUM: printf("%d",expr->expr->num);return;
+  case FUN: printf("fun(%s)->",expr->expr->fun.id);print_expr(expr->expr->fun.body);return;
+  case ID : printf("%s",expr->expr->id);return;
+  case APP : print_app(expr);return;
+  case OP : print_op(expr);return;
+  case COND : printf ("COND");return;
+  default : printf("non reconnu");
+  }
+}
+
+void print_app(struct expr *app){
+  if (app->expr->app.fun->type == OP){
+    print_expr(app->expr->app.arg);print_expr(app->expr->app.fun);
+  }
+  else{
+    print_expr(app->expr->app.fun);print_expr(app->expr->app.arg);
+  }
+}
+
+
+void print_op(struct expr *op){
+  switch(op->expr->op){
+  case PLUS: printf("+");return;
+  case MINUS: printf("-");return;
+  case MULT: printf("*");return;
+  case DIV: printf("/");return;
+  case MOD: printf("mod");return;
+  case LEQ: printf("<=");return;
+  case LE: printf("<");return;
+  case GEQ: printf(">=");return;
+  case GE: printf(">");return;
+  case EQ: printf("==");return;
+  case OR: printf("||");return;
+  case AND: printf("&&");return;
+  case NOT: printf("!");return;
+  case CONS: printf("cons");return;
+  case HEAD: printf("head");return;
+  case TAIL: printf("tail");return;
+  }
 }
 
 

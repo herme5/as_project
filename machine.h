@@ -33,3 +33,6 @@ struct env *push_env(char *id, struct closure *cl, struct env *env);
 struct env *push_rec_env(char *id, struct expr *expr, struct env *env);
 void step(struct configuration *conf);
 void print_list(struct expr *list);
+void print_expr(struct expr *expr);
+void print_op(struct expr *op);
+void print_app(struct expr *app);
