@@ -145,23 +145,23 @@ void step(struct configuration *conf){
     return;
   case OP:
     {
-      printf("1\n");
+      //printf("1\n");
       struct stack *stack = conf->stack;
 
       if(stack == NULL){return;}
-      printf("2\n");
+      //printf("2\n");
       struct closure *arg1 = stack->closure;
       stack = pop_stack(stack);
       conf->closure = arg1;
       conf->stack = NULL;
       step(conf);
-      printf("3\n");
+      //printf("3\n");
       int k1, k2;
       struct expr * e1 = conf->closure->expr;
-      printf("e = %d\n", e1->expr->num);
+      //printf("e = %d\n", e1->expr->num);
       struct cell c1, c2;
       if(conf->closure->expr->type==NUM){
-	printf("4\n");
+	//printf("4\n");
 	k1 = get_num(conf);
 	switch(expr->expr->op){
 	case NOT: conf->closure->expr->expr->num = !k1; return;
@@ -169,7 +169,7 @@ void step(struct configuration *conf){
 	}
       }
       if(conf->closure->expr->type==CELL){
-	printf("5\n");
+	//printf("5\n");
 	c1 = get_cell(conf);
 	switch(expr->expr->op){
 	case HEAD: conf->closure->expr->expr->cell = c1; return;
@@ -179,16 +179,16 @@ void step(struct configuration *conf){
       }
 
       if(stack == NULL){return;}
-      printf("6\n");
+      //printf("6\n");
       arg1=conf->closure;
       struct closure *arg2 = stack->closure;
       stack = pop_stack(stack);
       conf->closure = arg2;
       conf->stack = NULL;
       step(conf);
-      printf("7\n");
+      //printf("7\n");
       if(conf->closure->expr->type==NUM){
-	printf("8\n");
+	//printf("8\n");
 	k2 = get_num(conf);
 	switch (expr->expr->op){
 	case PLUS:  conf->closure = mk_closure(mk_int(k1 + k2 ),NULL); return;
@@ -208,18 +208,18 @@ void step(struct configuration *conf){
 	}
       }
       if(conf->closure->expr->type==CELL){
-	printf("9\n");
+	//printf("9\n");
 	c2 = get_cell(conf);
-    printf("10\n");
+	//printf("10\n");
 
-    print_list(conf->closure->expr);
+	//print_list(conf->closure->expr);
 
 	switch (expr->expr->op){
        case CONS:  conf->closure = mk_closure(mk_cell(e1,conf->closure->expr),NULL); return; //TODO
 	default:    assert(0);
 	}
       }
-      printf("10\n");
+      //printf("10\n");
     }
     ;
   default: assert(0);
