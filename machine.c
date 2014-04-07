@@ -68,13 +68,13 @@ struct stack *push_stack(struct closure *cl, struct stack *stack){
   return st;
 }
 
-void print_list(struct cell *list){
+void print_list(struct expr *list){
   printf("{");
-  struct cell *tmp = list;
+  struct expr *tmp = list;
   if (tmp != NULL){
-    while(tmp->cdr != NULL){
-      printf("%d ",tmp->car->expr->num);
-      tmp = (tmp->cdr);
+    while(tmp->expr->cell.cdr != NULL){
+      printf("%d ",tmp->expr->cell.car->expr->num);
+      tmp = (tmp->expr->cell.cdr);
     }
   }
   printf("}\n");
@@ -212,10 +212,10 @@ void step(struct configuration *conf){
 	c2 = get_cell(conf);
     printf("10\n");
 
-    print_list(&c2);
+    print_list(conf->closure->expr);
 
 	switch (expr->expr->op){
-       case CONS:  conf->closure = mk_closure(mk_cell(e1,&c2),NULL); return; //TODO
+       case CONS:  conf->closure = mk_closure(mk_cell(e1,conf->closure->expr),NULL); return; //TODO
 	default:    assert(0);
 	}
       }

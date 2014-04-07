@@ -56,7 +56,7 @@ struct expr *mk_cond(struct expr *cond, struct expr *then_br, struct expr *else_
   return e;
 }
 
-struct expr *mk_cell(struct expr *car, struct cell *cdr){
+struct expr *mk_cell(struct expr *car, struct expr *cdr){
   struct expr *res = mk_node();
   res->type = CELL;
   res->expr->cell.car = car;

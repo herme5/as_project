@@ -77,7 +77,7 @@ s :
   step(conf);
   switch(conf->closure->expr->type){
   case NUM:  printf(">>> %d \n", conf->closure->expr->expr->num); break;
-  case CELL: printf(">>> "); print_list(&(conf->closure->expr->expr->cell)); printf("\n"); break;
+  case CELL: printf(">>> "); print_list((conf->closure->expr)); printf("\n"); break;
   default:   break;
   }
 }
@@ -89,7 +89,7 @@ s :
   step(conf);
   switch(conf->closure->expr->type){
   case NUM:  printf(">>> %d \n", conf->closure->expr->expr->num); break;
-  case CELL: printf(">>> "); print_list(&(conf->closure->expr->expr->cell)); printf("\n"); break;
+  case CELL: printf(">>> "); print_list((conf->closure->expr)); printf("\n"); break;
   default:   break;
   }
 }
