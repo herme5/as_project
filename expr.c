@@ -12,7 +12,6 @@ struct expr *mk_node(void){
 struct expr *mk_id(char *id){
   struct expr *e = mk_node();
   e->type = ID;
-
   e->expr->id = id;
   return e;
 }
@@ -63,3 +62,16 @@ struct expr *mk_cell(struct expr *car, struct expr *cdr){
   res->expr->cell.cdr = cdr;
   return res;
 }
+
+struct expr *mk_head(struct expr *list){
+  struct expr *res = mk_node();
+  res = list->expr->cell.car;
+  return res;
+}
+
+struct expr *mk_tail(struct expr *list){
+  struct expr *res = mk_node();
+  res = list->expr->cell.cdr;
+  return res;
+}
+  

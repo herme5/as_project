@@ -172,8 +172,8 @@ void step(struct configuration *conf){
 	//printf("5\n");
 	c1 = get_cell(conf);
 	switch(expr->expr->op){
-	case HEAD: conf->closure->expr->expr->cell = c1; return;
-	case TAIL: conf->closure->expr->expr->cell = c1; return;
+	case HEAD: conf->closure = mk_closure(mk_head(conf->closure->expr),NULL); return;
+	case TAIL: conf->closure = mk_closure(mk_tail(conf->closure->expr),NULL); return;
 	default: ;
 	}
       }
@@ -215,7 +215,7 @@ void step(struct configuration *conf){
 	//print_list(conf->closure->expr);
 
 	switch (expr->expr->op){
-       case CONS:  conf->closure = mk_closure(mk_cell(e1,conf->closure->expr),NULL); return; //TODO
+	case CONS:  conf->closure = mk_closure(mk_cell(e1,conf->closure->expr),NULL); return;
 	default:    assert(0);
 	}
       }

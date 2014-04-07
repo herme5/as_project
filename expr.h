@@ -43,6 +43,8 @@ struct expr{
 
 
 struct expr *mk_cell(struct expr * car, struct expr * cdr);
+struct expr *mk_head(struct expr * list);
+struct expr *mk_tail(struct expr * list);
 struct expr *mk_node(void);
 struct expr *mk_id(char *id);
 struct expr *mk_fun(char *id, struct expr *body);

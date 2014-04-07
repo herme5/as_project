@@ -133,8 +133,8 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 
 | T_CONS e[expr] e[list] {$$ = mk_app(mk_app(mk_op(CONS),$expr), $list);}
 | list {$$=$1;}
-//TODO | T_HEAD e {$$=mk_head($2);}
-//TODO | T_TAIL e {$$=mk_tail($2);}
+| T_HEAD e {$$ = mk_app(mk_op(HEAD),($2));}
+| T_TAIL e {$$ = mk_app(mk_op(TAIL),($2));}
 //TODO | T_APPEND e e {}
 ;
 
