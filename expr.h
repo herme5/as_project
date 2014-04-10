@@ -1,14 +1,14 @@
 
-enum expr_kind {ID, FUN, APP, NUM, OP, COND, CELL};
+enum expr_kind {ID, FUN, APP, NUM, OP, COND, CELL, NIL};
 
-enum op{PLUS, MINUS, MULT, DIV, MOD, LEQ, LE, GEQ, GE, EQ, OR, AND, NOT, CONS, HEAD, TAIL};
+enum op{PLUS, MINUS, MULT, DIV, MOD, LEQ, LE, GEQ, GE, EQ, OR, AND, NOT, CONS, HEAD, TAIL, APPEND, HEADN};
 
 struct expr;
 
 struct fun{
   char *id;
   struct expr *body;
-};
+};  
 
 struct cell{
   struct expr *car;
@@ -44,6 +44,7 @@ struct expr{
 
 struct expr *mk_cell(struct expr * car, struct expr * cdr);
 struct expr *mk_head(struct expr * list);
+struct expr *mk_headn(struct expr * list, struct expr * num);
 struct expr *mk_tail(struct expr * list);
 struct expr *mk_node(void);
 struct expr *mk_id(char *id);
@@ -54,3 +55,5 @@ struct expr *mk_int(int k);
 struct expr *mk_cond(struct expr *cond, struct expr *then_br, struct expr *else_br);
 struct expr *get_nil();
 struct expr *mk_nil();
+struct expr *mk_append(struct expr *list1, struct expr *list2);
+struct expr *mk_reverse(struct expr *list, struct expr *list2);

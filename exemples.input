@@ -1,8 +1,74 @@
+print"2-1;";
+
+2 - 1;
+
+print"let x = 5;";
+
+let x = 5;
+
+print"if !((x%3)==2) then 0 else 1;";
+
+if !((x%3)==2) then 0 else 1;
+
+print"x - 4 where x = 5;";
+
+x - 4 where x = 5;
+
+print"let x = 5 in x - 4;";
+
+let x = 5 in x - 4;
+
+print"let f = fun n -> 
+    (let x = if n%2==0 then 1 else 0 in
+    x + n*n);";
+
 let f = fun n -> 
     (let x = if n%2==0 then 1 else 0 in
     x + n*n)
 ;
 
+print"(f 4)";
+
 (f 4);
 
-[1, 5, 6, 34];
+print"let g = fun x y z -> 100*x + 10*y + z;";
+
+let g = fun x y z -> 100*x + 10*y + z;
+
+print"(g 1 2 3);";
+
+(g 1 2 3);
+
+print"let l = [1, 5, 6, 34];"
+
+let l = [1, 5, 6, 34];
+
+print"let m = [8, 12, 32];";
+
+let m = [8, 12, 32];
+
+print"let c = append l m;";
+
+let c = append l m;
+
+print"l;";
+
+l;
+
+
+
+m;
+
+
+
+c; 
+
+
+
+
+
+head 3 c;
+
+
+
+head 123 c;

@@ -5,7 +5,7 @@
 #include <assert.h>
 #include "machine.h"
 
-#define MAX_CLOSURE 1000000
+#define MAX_CLOSURE 10000000
 
 int nb_closure;
 
@@ -92,6 +92,7 @@ void print_expr(struct expr *expr){
   case APP : print_app(expr);return;
   case OP : print_op(expr);return;
   case COND : printf ("COND");return;
+  case NIL : printf ("NIL");return;
   default : printf("non reconnu");
   }
 }
@@ -190,6 +191,8 @@ void step(struct configuration *conf){
     return;
   case CELL:
     return;
+  case NIL:
+    return;
   case OP:
     {
       //printf("1\n");
@@ -206,7 +209,7 @@ void step(struct configuration *conf){
       int k1, k2;
       struct expr * e1 = conf->closure->expr;
       //printf("e = %d\n", e1->expr->num);
-      struct cell c1, c2;
+      struct expr * c1,* c2;
       if(conf->closure->expr->type==NUM){
 	//printf("4\n");
 	k1 = get_num(conf);
@@ -217,7 +220,7 @@ void step(struct configuration *conf){
       }
       if(conf->closure->expr->type==CELL){
 	//printf("5\n");
-	c1 = get_cell(conf);
+	c1 = conf->closure->expr;
 	switch(expr->expr->op){
 	case HEAD: conf->closure = mk_closure(mk_head(conf->closure->expr),NULL); return;
 	case TAIL: conf->closure = mk_closure(mk_tail(conf->closure->expr),NULL); return;
@@ -256,13 +259,15 @@ void step(struct configuration *conf){
       }
       if(conf->closure->expr->type==CELL){
 	//printf("9\n");
-	c2 = get_cell(conf);
+	c2 = conf->closure->expr;
 	//printf("10\n");
 
 	//print_list(conf->closure->expr);
 
 	switch (expr->expr->op){
 	case CONS:  conf->closure = mk_closure(mk_cell(e1,conf->closure->expr),NULL); return;
+	case APPEND: conf->closure = mk_closure(mk_append(c1,c2),NULL); return;
+	case HEADN: conf->closure = mk_closure(mk_headn(c2, e1),NULL); return;
 	default:    assert(0);
 	}
       }

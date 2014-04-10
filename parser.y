@@ -15,6 +15,7 @@ struct configuration * conf = &conf_concrete;
 
 %token<num> T_NUM
 %token<id> T_ID
+%token<print> T_PRINT
 %token EOE
 %token T_LET
 %token T_IF
@@ -41,6 +42,8 @@ struct configuration * conf = &conf_concrete;
 %token T_OR
 %token T_NOT
 
+%token T_REC
+
 %type<t_exp> e
 %type<t_exp> p
 %type<t_exp> f
@@ -48,6 +51,8 @@ struct configuration * conf = &conf_concrete;
 %type<t_exp> list
 
 %left T_WHERE
+%nonassoc T_HEAD T_TAIL
+%nonassoc T_APPEND
 %right T_IN
 %right T_ARROW T_ELSE
 %right T_AND T_OR T_NOT
@@ -64,6 +69,7 @@ struct configuration * conf = &conf_concrete;
 %union{
   char *id;
   int num;
+  char *print;
   struct expr * t_exp;
 }
 
@@ -75,24 +81,30 @@ s :
   conf->closure = mk_closure($2,environment);
   conf->stack=NULL;
   step(conf);
-  switch(conf->closure->expr->type){
-  case NUM:  printf(">>> %d \n", conf->closure->expr->expr->num); break;
-  case CELL: printf(">>> "); print_list((conf->closure->expr)); printf("\n"); break;
-  default:   break;
-  }
+  printf(">>> "); print_expr(conf->closure->expr); printf("\n");
+  
 }
 
-| s T_LET T_ID[var] '=' e[expr] EOE {
+| s T_PRINT EOE {printf("> ");printf($2);printf("\n");}
+
+| s T_LET T_REC T_ID[var] '=' e[expr] EOE {
   environment = push_rec_env($var,$expr,environment);
   conf->closure = mk_closure($expr,environment);
   conf->stack=NULL;
   step(conf);
-  switch(conf->closure->expr->type){
-  case NUM:  printf(">>> %d \n", conf->closure->expr->expr->num); break;
-  case CELL: printf(">>> "); print_list((conf->closure->expr)); printf("\n"); break;
-  default:   break;
-  }
-}
+  printf(">>> "); print_expr(conf->closure->expr); printf("\n");
+ }
+
+| s T_LET T_ID[var] '=' e[expr] EOE {
+  struct closure * cl = mk_closure($expr,environment);
+  conf->closure = cl;
+  conf->stack=NULL;
+  step(conf);
+  environment = push_env($var,cl,environment);
+  printf(">>> "); print_expr(conf->closure->expr); printf("\n");
+ }
+
+
 ;
 
 
@@ -134,7 +146,9 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | T_CONS e[expr] e[list] {$$ = mk_app(mk_app(mk_op(CONS),$expr), $list);}
 | list {$$=$1;}
 | T_HEAD e {$$ = mk_app(mk_op(HEAD),($2));}
+| T_HEAD e e {$$ = $$ = mk_app(mk_app(mk_op(HEADN),($2)),$3);}
 | T_TAIL e {$$ = mk_app(mk_op(TAIL),($2));}
+| T_APPEND e e {$$ = mk_app(mk_app(mk_op(APPEND),$2),$3);}
 //TODO | T_APPEND e e {}
 ;
 
