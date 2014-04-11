@@ -82,7 +82,7 @@ s :
   conf->stack=NULL;
   step(conf);
   printf(">>> "); print_expr(conf->closure->expr); printf("\n");
-  
+
 }
 
 | s T_PRINT EOE {printf("> ");printf($2);printf("\n");}
@@ -91,7 +91,7 @@ s :
   environment = push_rec_env($var,$expr,environment);
   conf->closure = mk_closure($expr,environment);
   conf->stack=NULL;
-  step(conf);
+  //step(conf);
   printf(">>> "); print_expr(conf->closure->expr); printf("\n");
  }
 
@@ -99,7 +99,7 @@ s :
   struct closure * cl = mk_closure($expr,environment);
   conf->closure = cl;
   conf->stack=NULL;
-  step(conf);
+  //step(conf);
   environment = push_env($var,cl,environment);
   printf(">>> "); print_expr(conf->closure->expr); printf("\n");
  }
@@ -146,10 +146,9 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | T_CONS e[expr] e[list] {$$ = mk_app(mk_app(mk_op(CONS),$expr), $list);}
 | list {$$=$1;}
 | T_HEAD e {$$ = mk_app(mk_op(HEAD),($2));}
-| T_HEAD e e {$$ = $$ = mk_app(mk_app(mk_op(HEADN),($2)),$3);}
+//| T_HEAD e e {$$ = $$ = mk_app(mk_app(mk_op(HEADN),$2),$3);}
 | T_TAIL e {$$ = mk_app(mk_op(TAIL),($2));}
 | T_APPEND e e {$$ = mk_app(mk_app(mk_op(APPEND),$2),$3);}
-//TODO | T_APPEND e e {}
 ;
 
 /* | T_LET T_ID '=' e { */
