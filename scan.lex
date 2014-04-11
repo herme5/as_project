@@ -8,6 +8,7 @@
 %option noyywrap
 
 %x PRINT
+%x COM
 %%
 
 let   {return T_LET;}
@@ -29,12 +30,20 @@ append {return T_APPEND;}
 <PRINT>\" {yylval.print = c; BEGIN INITIAL; return T_PRINT;}
 <PRINT>.|\n {c = strcat(c, yytext);}
 
+<INITIAL>"/*" {BEGIN COM;}
+<COM>. {;}
+<COM>"*/" {BEGIN INITIAL;}
+"//".*\n {;}
+
+
+
+<INITIAL>
+
 [[:digit:]]+ {yylval.num = atoi(yytext); return T_NUM;}
 [[:alpha:]]+ {yylval.id= strdup(yytext); return T_ID;}
 
 [[:space:]] {;}
 "->" {return T_ARROW;}
-
 
 "<"  {return T_LE;}
 ">"  {return T_GE;}
