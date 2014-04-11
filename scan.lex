@@ -40,7 +40,8 @@ append {return T_APPEND;}
 <INITIAL>
 
 [[:digit:]]+ {yylval.num = atoi(yytext); return T_NUM;}
-[[:alpha:]]+ {yylval.id= strdup(yytext); return T_ID;}
+[[:alpha:]][[:alnum:]]* {yylval.id= strdup(yytext); if (is_fun(yylval.id, get_env())){return T_FUN_ID;}else
+   return T_ID;}
 
 [[:space:]] {;}
 "->" {return T_ARROW;}

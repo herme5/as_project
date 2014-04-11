@@ -55,6 +55,13 @@ struct closure *search_env(char *id, struct env *env){
   else{return search_env(id,env->next);}
 }
 
+struct closure *search_env2(char *id, struct env *env){
+   if (env==NULL)
+      return NULL;
+   if(strcmp(id,env->id)==0){return env->closure;}
+   else{return search_env2(id,env->next);}
+}
+
 struct stack *pop_stack(struct stack *stack){
   struct stack *next = stack->next;
   free(stack);
@@ -81,6 +88,21 @@ void print_list(struct expr *list){
     }
   }
   printf("}");
+}
+
+int is_fun(char *id, struct env *env){
+   if (env == NULL)
+      return 0;
+
+   struct closure * closure= search_env2(id, env);
+   if (closure == NULL)
+      return 0;
+
+   if (closure->expr->type == FUN){
+      return 1;
+   }
+   return 0;
+
 }
 
 void print_expr(struct expr *expr){

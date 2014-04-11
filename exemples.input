@@ -1,4 +1,4 @@
-print"2-1;";
+/*print"2-1;";
 
 2 - 1;
 
@@ -18,11 +18,11 @@ print"let x = 5 in x - 4;";
 
 let x = 5 in x - 4;
 
-print"let f = fun n -> 
+print"let f = fun n ->
     (let x = if n%2==0 then 1 else 0 in
     x + n*n);";
 
-let f = fun n -> 
+let f = fun n ->
     (let x = if n%2==0 then 1 else 0 in
     x + n*n)
 ;
@@ -39,7 +39,7 @@ print"(g 1 2 3);";
 
 (g 1 2 3);
 
-print"let l = [1, 5, 6, 34];"
+print"let l = [1, 5, 6, 34];";
 
 let l = [1, 5, 6, 34];
 
@@ -61,14 +61,99 @@ m;
 
 
 
-c; 
+c;*/
+
+let x = 4;
+
+let y = 5;
+
+let succ = fun x -> x+1;
+
+let square = fun x -> x * x;
+
+succ x + y * 3;
+
+succ x + succ x * 2;
+
+let sq = fun x y -> square (x+y);
+
+let sq5 = fun x1 x2 x3 -> fun x4 x5 -> square (x1+x2+x3+x4) * x5;
+
+if succ x > 2 then square x + 2 else square x - 1;
+
+if if x==1 then 0 else 1 then x else -x;
+
+(if succ x > 2 then square x + 2 else square x - 1) + 5 * (if succ y > 0 || succ x >0 then -1 else 1);
+
+if succ x > 2 && square y *5 > 200/7 then square x + 2 else square x -1;
+
+(fun z -> (if succ x > 2 || if square y > 24 then succ x -1 <0 else square x > succ x
+       	  then fun x y -> x*x + 5*y -z
+    	  else fun x y -> x*y-y +z) 3 4) 7;
+
+let pgcd = fun x y ->
+    (fun mod ->
+    if x<y
+    then (fun z -> if z==0 then x else pgcd x z) (mod y x)
+    else (fun z -> if z==0 then y else pgcd y z) (mod x y))
+    fun x y -> x-x/y*y
+;
+
+pgcd 306 758;
+
+let premier_rec = fun n k->
+    if k<=1
+    then 1
+    else pgcd n k == 1 && premier_rec n (k-1);
+
+let premier = fun n -> premier_rec n (n-1);
+premier 11;
+
+/* test sur let in et where */
+
+square x + x where x=2;
+square if y <2 then 2 else 2 where y=3;
+let x = y*y in
+    square
+    if let x=z*2 in x < y + square 50
+       where z = y+1
+    then x*x+y
+    else y
+where y=x+z
+where x=1
+where z=2;
 
 
+/* test sur les listes */
+add 2 ::[0];
+2+1::[0];
 
+hd [0,0,0];
+hd (tl [0,0,0]);
+hd (tl (tl [0,0,0]));
 
+let map = fun f l ->
+    if l==[]
+    then []
+    else (f (hd l))::(map f (tl l));
 
-head 3 c;
+let x = hd (tl (map (fun x -> x +1) [0,0,0])) + -1;
 
+let append = fun l1 l2 ->
+    if l1==[]
+    then l2
+    else (hd l1)::(append (tl l1) l2);
 
+append [0,0,0] [1,1,1];
 
-head 123 c;
+let eq_list = fun l1 l2 ->
+    if l1==[]
+    then
+    if l2==[]
+    then 1
+    else 0
+    else
+    hd l1==hd l2 && eq_list (tl l1) (tl l2)
+;
+
+eq_list [0,0,0,1,1,1] (tl (append [0,0,0,0] [1,1,1]));
