@@ -18,28 +18,25 @@ else  {return T_ELSE;}
 fun   {return T_FUN;}
 in    {return T_IN;}
 where {return T_WHERE;}
+rec   {return T_REC;}
 
-rec {return T_REC;}
+::    {return T_CONS;}
+hd    {return T_HEAD;}
+head  {return T_HEAD;}
+pop   {return T_HEAD;}
+tail  {return T_TAIL;}
+tl    {return T_TAIL;}
 
-::  {return T_CONS;}
-hd  {return T_HEAD;}
-head {return T_HEAD;}
-pop {return T_HEAD;}
-tail {return T_TAIL;}
-tl  {return T_TAIL;}
+<INITIAL>print[[:space:]]*\" {c = malloc(10000*sizeof(char)); BEGIN PRINT;}
 
-<INITIAL>print\" {c=malloc(10000*sizeof(char)); BEGIN PRINT;}
-<PRINT>\" {yylval.print = c; BEGIN INITIAL; return T_PRINT;}
+<INITIAL>"/*"     {BEGIN COM;}
+<INITIAL>"//".*\n {;}
+
+<PRINT>\"   {yylval.print = c; BEGIN INITIAL; return T_PRINT;}
 <PRINT>.|\n {c = strcat(c, yytext);}
 
-<INITIAL>"/*" {BEGIN COM;}
-<COM>. {;}
-<COM>"*/" {BEGIN INITIAL;}
-"//".*\n {;}
-
-
-
-<INITIAL>
+<COM>.      {;}
+<COM>"*/"   {BEGIN INITIAL;}
 
 [[:digit:]]+ {yylval.num = atoi(yytext); return T_NUM;}
 [[:alpha:]](_|[[:alnum:]])* {yylval.id= strdup(yytext); return T_ID;}
@@ -58,4 +55,5 @@ tl  {return T_TAIL;}
 "!"  {return T_NOT;}
 
 [+\-*/=()\[\]\%,] {return yytext[0];}
+
 ; {return EOE;}

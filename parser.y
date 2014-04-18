@@ -82,34 +82,31 @@ struct env * get_env(){
 
 
 s :
+
+| s EOE {;}
+
 | s e EOE {
   conf->closure = mk_closure($2,environment);
   conf->stack=NULL;
   step(conf);
-  printf(">>> "); print_expr(conf->closure->expr); printf("\n");
-
-}
+  printf(">>> "); print_expr(conf->closure->expr); printf("\n");}
 
 | s T_PRINT EOE {printf("> ");printf($2);printf("\n");}
 
 | s T_LET T_REC T_ID[var] '=' e[expr] EOE {
   environment = push_rec_env($var,$expr,environment);
   conf->closure = mk_closure($expr,environment);
-  conf->stack=NULL;
-  //step(conf);
-  printf(">>> "); print_expr(conf->closure->expr); printf("\n");
- }
+  conf->stack=NULL; //step(conf);
+  printf(">>> "); print_expr(conf->closure->expr); printf("\n");}
 
 | s T_LET T_ID[var] '=' e[expr] EOE {
   struct closure * cl = mk_closure($expr,environment);
   conf->closure = cl;
-  conf->stack=NULL;
-  //step(conf);
+  conf->stack=NULL; //step(conf);
   environment = push_env($var,cl,environment);
-  printf(">>> "); print_expr(conf->closure->expr); printf("\n");
- }
-
+  printf(">>> "); print_expr(conf->closure->expr); printf("\n");}
 ;
+
 
 e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | e '-' e     {$$ = mk_app(mk_app(mk_op(MINUS),$1),$3);}
@@ -163,13 +160,14 @@ f : '(' e e {$$ = mk_app($2, $3);}
 | f e       {$$ = mk_app($1,$2);}
 ;
 
-list: '[' l {$$ = $2;}
 
-l :
-e ']'       {$$ = mk_app(mk_app(mk_op(CONS),$1),mk_cell(NULL, NULL));}
+list: '[' l {$$ = $2;}
+;
+
+l : e ']'   {$$ = mk_app(mk_app(mk_op(CONS),$1),mk_cell(NULL, NULL));}
 | e',' l    {$$ = mk_app(mk_app(mk_op(CONS),$1),$3);}
 |']'        {$$ = mk_cell(NULL, NULL);}
-
+;
 
 %%
 

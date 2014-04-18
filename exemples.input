@@ -1,4 +1,4 @@
-(-3)+10<= 7;
+(-3) + 10 <= 7;
 
 let x = 4;
 
@@ -28,14 +28,12 @@ if (succ x) > 2 && (square y) *5 > 200/7 then (square x) + 2 else (square x) -1;
        	  then fun x y -> x*x + 5*y -z
     	  else fun x y -> x*y-y +z) 3 4) 7);
 
-
 let rec pgcd = fun x y ->
     ((fun mod ->
     if x<y
     then ((fun z -> if z==0 then x else (pgcd x z)) (mod y x))
     else ((fun z -> if z==0 then y else (pgcd y z)) (mod x y)))
-    fun x y -> x-x/y*y)
-;
+    fun x y -> x-x/y*y);
 
 (pgcd 306 758);
 
@@ -48,7 +46,10 @@ let premier = fun n -> (premier_rec n (n-1));
 (premier 11);
 (premier 12);
 
-/* test sur let in et where */
+
+/*=========================
+test sur let in et where 
+===========================*/
 
 (square x) + x where x=2;
 (square if y <2 then 2 else 2) where y=3;
@@ -63,7 +64,10 @@ where x=1
 where z=2;
 
 
-/* test sur les listes */
+/*========================
+ test sur les listes 
+==========================*/
+
 let add = fun x -> x+3;
 (add 2) ::[0];
 2+1::[0];
@@ -105,8 +109,7 @@ let rec eq_list = fun l1 l2 ->
     then 1
     else 0
     else
-    hd l1==hd l2 && (eq_list (tl l1) (tl l2))
-;
+    hd l1==hd l2 && (eq_list (tl l1) (tl l2));
 
 (eq_list [0,0,0,1,1,1] (tl (append [0,0,0,0] [1,1,1])));
 
@@ -123,8 +126,8 @@ let rec premiers_rev = fun n ->
 let rec rev_rec = fun l acc->
     if l==[]
     then acc
-    else (rev_rec (tl l) ((hd l)::acc))
-;
+    else (rev_rec (tl l) ((hd l)::acc));
+
 let rev = fun l -> (rev_rec l []);
 
 let premiers = fun n -> (rev (premiers_rev n));
