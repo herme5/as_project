@@ -16,7 +16,7 @@ struct closure{
   struct expr *expr;
   struct env *env;
 };
-    
+
 struct configuration{
   struct closure *closure;
   struct stack *stack;
@@ -36,3 +36,4 @@ void print_list(struct expr *list);
 void print_expr(struct expr *expr);
 void print_op(struct expr *op);
 void print_app(struct expr *app);
+void print_cond(struct expr *cond);

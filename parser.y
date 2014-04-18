@@ -49,12 +49,12 @@ struct env * get_env(){
 %token T_REC
 
 %type<t_exp> e
+%type<t_exp> f
 %type<t_exp> p
 %type<t_exp> l
 %type<t_exp> list
 
 %left T_WHERE
-%nonassoc T_HEAD T_TAIL
 %right T_IN
 %right T_ARROW T_ELSE
 %right T_IF T_THEN
@@ -68,6 +68,7 @@ struct env * get_env(){
 %left '%'
 %left '+' '-'
 %left '*' '/'
+%nonassoc T_HEAD T_TAIL
 %nonassoc '(' ')'
 
 %union{
@@ -133,10 +134,13 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | T_IF e T_THEN e T_ELSE e {$$ = mk_cond($2,$4,$6);}
 | T_ID                     {$$=mk_id($1);}
 
+| T_FUN T_ID T_ARROW e {$$ = mk_fun ($2,$4);}
+
 /*FONCTION AVEC PLUSIEURS PARAMETRES*/
 | T_FUN T_ID p {$$ = mk_fun ($2,$3);}
 
-| e e {$$ = mk_app($1,$2);}
+| '(' e e ')'              {$$ = mk_app($2,$3);}
+| f e ')'                  {$$ = mk_app($1,$2);}
 
 /* LET IN */
 | T_LET T_ID[var] '=' e[expr1] T_IN e[expr2] {$$ = mk_app(mk_fun($var,$expr2),$expr1);}
@@ -147,21 +151,16 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | e[expr] T_CONS e[list] {$$ = mk_app(mk_app(mk_op(CONS),$expr), $list);}
 | list {$$=$1;}
 | T_HEAD e {$$ = mk_app(mk_op(HEAD),($2));}
-//| T_HEAD e e {$$ = $$ = mk_app(mk_app(mk_op(HEADN),$2),$3);}
 | T_TAIL e {$$ = mk_app(mk_op(TAIL),($2));}
 ;
 
-/* | T_LET T_ID '=' e { */
-/*   printf("affectation ici\n"); */
-/*   environment = push_rec_env($2,$4,environment); */
-/*   conf->closure = mk_closure($4,environment); */
-/*   conf->stack=NULL; */
-/*   step(conf); */
-/*   $$ = $4;} */
-/* | TFUN TID[1] TID[2] ARROW e -> TFUN TID[1] ARROW mkfun(TID[2], e)*/
 
 p : T_ID T_ARROW e {$$ = mk_fun ($1,$3);}
 | T_ID p           {$$ = mk_fun ($1, $2);}
+;
+
+f : '(' e e {$$ = mk_app($2, $3);}
+| f e       {$$ = mk_app($1,$2);}
 ;
 
 list: '[' l {$$ = $2;}

@@ -5,7 +5,7 @@
 #include <assert.h>
 #include "machine.h"
 
-#define MAX_CLOSURE 10000000
+#define MAX_CLOSURE 10000000000000000
 
 int nb_closure;
 
@@ -91,18 +91,28 @@ void print_expr(struct expr *expr){
   case ID : printf("%s",expr->expr->id);return;
   case APP : print_app(expr);return;
   case OP : print_op(expr);return;
-  case COND : printf ("COND");return;
+  case COND : print_cond(expr);return;
   case NIL : printf ("NIL");return;
   default : printf("non reconnu");
   }
 }
 
+void print_cond(struct expr *cond){
+   printf("\nif (");
+   print_expr(cond->expr->cond.cond);
+   printf(")\nthen ");
+   print_expr(cond->expr->cond.then_br);
+   printf("\nelse ");
+   print_expr(cond->expr->cond.else_br);
+
+}
+
 void print_app(struct expr *app){
   if (app->expr->app.fun->type == OP){
-    print_expr(app->expr->app.arg);print_expr(app->expr->app.fun);
+     print_expr(app->expr->app.arg);printf(" ");print_expr(app->expr->app.fun);
   }
   else{
-    print_expr(app->expr->app.fun);print_expr(app->expr->app.arg);
+    print_expr(app->expr->app.fun);printf(" ");print_expr(app->expr->app.arg);
   }
 }
 
@@ -126,6 +136,35 @@ void print_op(struct expr *op){
   case HEAD: printf("head");return;
   case TAIL: printf("tail");return;
   }
+}
+
+int list_equal(struct expr* l1, struct expr* l2){
+   if (l1 == NULL && l2 == NULL){
+      return 1;
+   }
+   if (l1 == NULL || l2 == NULL){
+      return 0;
+   }
+   if (l1->expr->cell.car == NULL && l2->expr->cell.car == NULL){
+      return 1;
+   }
+   if (l1->expr->cell.car == NULL || l2->expr->cell.car == NULL){
+      return 0;
+   }
+   if (element_equal(l1->expr->cell.car,l2->expr->cell.car)){
+      return list_equal(l1->expr->cell.cdr, l2->expr->cell.cdr);
+   }
+   return 0;
+}
+
+int element_equal(struct expr* e1, struct expr* e2){
+   assert (e1->type == e2->type);
+   assert (e1->type == NUM || e1->type == CELL);
+   switch (e1->type){
+      case NUM: return e1->expr->num == e2->expr->num;
+      case CELL: return list_equal(e1,e2);
+      default : return 0;
+   }
 }
 
 
@@ -268,6 +307,7 @@ void step(struct configuration *conf){
 	case CONS:  conf->closure = mk_closure(mk_cell(e1,conf->closure->expr),NULL); return;
 	case APPEND: conf->closure = mk_closure(mk_append(c1,c2),NULL); return;
 	case HEADN: conf->closure = mk_closure(mk_headn(c2, e1),NULL); return;
+       case EQ: conf->closure = mk_closure(mk_int(list_equal(c1,c2)),NULL); return;
 	default:    assert(0);
 	}
       }

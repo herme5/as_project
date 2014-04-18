@@ -22,8 +22,11 @@ where {return T_WHERE;}
 rec {return T_REC;}
 
 ::  {return T_CONS;}
-pop  {return T_HEAD;}
-tail  {return T_TAIL;}
+hd  {return T_HEAD;}
+head {return T_HEAD;}
+pop {return T_HEAD;}
+tail {return T_TAIL;}
+tl  {return T_TAIL;}
 
 <INITIAL>print\" {c=malloc(10000*sizeof(char)); BEGIN PRINT;}
 <PRINT>\" {yylval.print = c; BEGIN INITIAL; return T_PRINT;}
@@ -39,7 +42,7 @@ tail  {return T_TAIL;}
 <INITIAL>
 
 [[:digit:]]+ {yylval.num = atoi(yytext); return T_NUM;}
-[[:alpha:]][[:alnum:]]* {yylval.id= strdup(yytext); return T_ID;}
+[[:alpha:]](_|[[:alnum:]])* {yylval.id= strdup(yytext); return T_ID;}
 
 [[:space:]] {;}
 "->" {return T_ARROW;}
