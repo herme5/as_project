@@ -226,9 +226,9 @@ struct expr* set_centre(struct expr* cercle,struct expr *point){
 struct expr* set_point(struct expr* bezier,struct expr *point,int pos){
    switch (pos){
       case 1: bezier->expr->bezier.point1 = point; break;
-      case 2: bezier->expr->bezier.point1 = point; break;
-      case 3: bezier->expr->bezier.point1 = point; break;
-      case 4: bezier->expr->bezier.point1 = point; break;
+      case 2: bezier->expr->bezier.point2 = point; break;
+      case 3: bezier->expr->bezier.point3 = point; break;
+      case 4: bezier->expr->bezier.point4 = point; break;
    }
    return bezier;
 }
@@ -284,6 +284,8 @@ void step(struct configuration *conf){
   case POINT:
     return;
   case CIRCLE:
+    return;
+  case BEZIER:
     return;
   case CELL:
     return;
@@ -369,10 +371,6 @@ void step(struct configuration *conf){
       }
       if(conf->closure->expr->type==POINT){
          c2 = conf->closure->expr;
-         printf("2e argument : ");
-         print_point(c2);
-         printf("\n");
-
          switch (expr->expr->op){
             case SETCENTRE: conf->closure = mk_closure(set_centre(c1,c2),NULL); return;
             case SETPOINT1: conf->closure = mk_closure(set_point(c1,c2,1),NULL); return;
