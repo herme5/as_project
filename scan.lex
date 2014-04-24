@@ -27,6 +27,12 @@ pop   {return T_HEAD;}
 tail  {return T_TAIL;}
 tl    {return T_TAIL;}
 
+Cercle {return T_CIRCLE;}
+cercle {return T_CIRCLE;}
+
+bezier {return T_BEZIER;}
+Bezier {return T_BEZIER;}
+
 <INITIAL>print[[:space:]]*\" {c = malloc(10000*sizeof(char)); BEGIN PRINT;}
 
 <INITIAL>"/*"     {BEGIN COM;}
@@ -54,6 +60,6 @@ tl    {return T_TAIL;}
 "||" {return T_OR;}
 "!"  {return T_NOT;}
 
-[+\-*/=()\[\]\%,] {return yytext[0];}
+[+\-*/=()\[\]\%,\{\}] {return yytext[0];}
 
 ; {return EOE;}

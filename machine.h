@@ -37,3 +37,13 @@ void print_expr(struct expr *expr);
 void print_op(struct expr *op);
 void print_app(struct expr *app);
 void print_cond(struct expr *cond);
+void print_point(struct expr *point);
+void print_circle(struct expr *circle);
+void print_bezier(struct expr *circle);
+
+int element_equal(struct expr* e1, struct expr *e2);
+struct expr* set_abs(struct expr* point,int abs);
+struct expr* set_ord(struct expr* point,int ord);
+struct expr* set_rayon(struct expr* cercle,int rayon);
+struct expr* set_centre(struct expr* cercle,struct expr *point);
+struct expr* set_point(struct expr* bezier,struct expr *point,int pos);

@@ -55,6 +55,24 @@ struct expr *mk_cond(struct expr *cond, struct expr *then_br, struct expr *else_
   return e;
 }
 
+struct expr *mk_circle(){
+   struct expr *e = mk_node();
+   e->type=CIRCLE;
+   return e;
+}
+
+struct expr *mk_bezier(){
+   struct expr *e = mk_node();
+   e->type=BEZIER;
+   return e;
+}
+
+struct expr *mk_point(){
+   struct expr *e = mk_node();
+   e->type=POINT;
+   return e;
+}
+
 struct expr *mk_cell(struct expr *car, struct expr *cdr){
   struct expr *res = mk_node();
   res->type = CELL;
@@ -110,6 +128,6 @@ struct expr *mk_reverse(struct expr *list, struct expr *finallist){
     return (mk_reverse(mk_tail(list),mk_cell(mk_head(list),finallist)));
   }
 }
-  
+
 //fold f [a0, a1, ..., an] b
 //(f an (...(f a2(f a1 a0)) ...))

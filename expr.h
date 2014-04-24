@@ -1,14 +1,37 @@
 
-enum expr_kind {ID, FUN, APP, NUM, OP, COND, CELL, NIL};
+enum expr_kind {ID, FUN, APP, NUM, OP, COND, CELL, NIL, POINT, PATH, CIRCLE, BEZIER};
 
-enum op{PLUS, MINUS, MULT, DIV, MOD, LEQ, LE, GEQ, GE, EQ, OR, AND, NOT, CONS, HEAD, TAIL, APPEND, HEADN};
+enum op{PLUS, MINUS, MULT, DIV, MOD, LEQ, LE, GEQ, GE, EQ, OR, AND, NOT, CONS, HEAD, TAIL, APPEND, HEADN, SETABS, SETORD, SETRAYON, SETCENTRE, SETPOINT1, SETPOINT2, SETPOINT3, SETPOINT4};
 
 struct expr;
 
 struct fun{
   char *id;
   struct expr *body;
-};  
+};
+
+struct point{
+   int abs;
+   int ord;
+};
+
+// TODO
+/*struct path{
+
+};*/
+
+struct circle{
+   struct expr *centre;
+   int rayon;
+};
+
+struct bezier{
+   struct expr* point1;
+   struct expr* point2;
+   struct expr* point3;
+   struct expr* point4;
+};
+
 
 struct cell{
   struct expr *car;
@@ -34,6 +57,9 @@ union node{
   int num;
   struct cond cond;
   struct cell cell;
+   struct point point;
+   struct circle circle;
+   struct bezier bezier;
 };
 
 struct expr{
@@ -57,3 +83,6 @@ struct expr *get_nil();
 struct expr *mk_nil();
 struct expr *mk_append(struct expr *list1, struct expr *list2);
 struct expr *mk_reverse(struct expr *list, struct expr *list2);
+struct expr *mk_point();
+struct expr *mk_circle();
+struct expr *mk_bezier();

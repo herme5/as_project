@@ -93,8 +93,33 @@ void print_expr(struct expr *expr){
   case OP : print_op(expr);return;
   case COND : print_cond(expr);return;
   case NIL : printf ("NIL");return;
+  case POINT : print_point(expr);return;
+  case CIRCLE : print_circle(expr);return;
+  case BEZIER : print_bezier(expr);return;
   default : printf("non reconnu");
   }
+}
+
+void print_bezier(struct expr *bezier){
+   printf("(");
+   print_expr(bezier->expr->bezier.point1);
+   printf(",");
+   print_expr(bezier->expr->bezier.point2);
+   printf(",");
+   print_expr(bezier->expr->bezier.point3);
+   printf(",");
+   print_expr(bezier->expr->bezier.point4);
+   printf(")");
+}
+
+void print_circle(struct expr *circle){
+   printf("(");
+   print_expr(circle->expr->circle.centre);
+   printf(",%d)", circle->expr->circle.rayon);
+}
+
+void print_point(struct expr *point){
+   printf("(%d,%d)",point->expr->point.abs,point->expr->point.ord);
 }
 
 void print_cond(struct expr *cond){
@@ -167,7 +192,6 @@ int element_equal(struct expr* e1, struct expr* e2){
    }
 }
 
-
 int get_num(struct configuration * conf){
   step(conf);
   assert(conf->closure->expr->type==NUM);
@@ -178,6 +202,35 @@ struct cell get_cell(struct configuration * conf){
   step(conf);
   assert(conf->closure->expr->type==CELL);
   return conf->closure->expr->expr->cell;
+}
+
+struct expr* set_abs(struct expr* point,int abs){
+   point->expr->point.abs = abs;
+   return point;
+}
+
+struct expr* set_ord(struct expr* point,int ord){
+   point->expr->point.ord = ord;
+   return point;
+}
+
+struct expr* set_rayon(struct expr* cercle,int rayon){
+   cercle->expr->circle.rayon = rayon;
+   return cercle;
+}
+struct expr* set_centre(struct expr* cercle,struct expr *point){
+   cercle->expr->circle.centre = point;
+   return cercle;
+}
+
+struct expr* set_point(struct expr* bezier,struct expr *point,int pos){
+   switch (pos){
+      case 1: bezier->expr->bezier.point1 = point; break;
+      case 2: bezier->expr->bezier.point1 = point; break;
+      case 3: bezier->expr->bezier.point1 = point; break;
+      case 4: bezier->expr->bezier.point1 = point; break;
+   }
+   return bezier;
 }
 
 void step(struct configuration *conf){
@@ -228,6 +281,10 @@ void step(struct configuration *conf){
     }
   case NUM:
     return;
+  case POINT:
+    return;
+  case CIRCLE:
+    return;
   case CELL:
     return;
   case NIL:
@@ -250,12 +307,20 @@ void step(struct configuration *conf){
       //printf("e = %d\n", e1->expr->num);
       struct expr * c1,* c2;
       if(conf->closure->expr->type==NUM){
-	//printf("4\n");
 	k1 = get_num(conf);
 	switch(expr->expr->op){
 	case NOT: conf->closure->expr->expr->num = !k1; return;
 	default: ;
 	}
+      }
+      if(conf->closure->expr->type==POINT){
+         c1 = conf->closure->expr;
+      }
+      if(conf->closure->expr->type==CIRCLE){
+         c1 = conf->closure->expr;
+      }
+      if(conf->closure->expr->type==BEZIER){
+         c1 = conf->closure->expr;
       }
       if(conf->closure->expr->type==CELL){
 	//printf("5\n");
@@ -277,10 +342,16 @@ void step(struct configuration *conf){
       step(conf);
       //printf("7\n");
       if(conf->closure->expr->type==NUM){
-	//printf("8\n");
+         //printf("8\n");
 	k2 = get_num(conf);
 	switch (expr->expr->op){
-	case PLUS:  conf->closure = mk_closure(mk_int(k1 + k2 ),NULL); return;
+    case SETABS: conf->closure = mk_closure(set_abs(c1,k2),NULL); return;
+
+    case SETORD: conf->closure = mk_closure(set_ord(c1,k2),NULL); return;
+
+    case SETRAYON: conf->closure = mk_closure(set_rayon(c1,k2),NULL);return;
+
+    case PLUS:  conf->closure = mk_closure(mk_int(k1 + k2 ),NULL); return;
 	case MINUS: conf->closure = mk_closure(mk_int(k1 - k2 ),NULL); return;
 	case MULT:  conf->closure = mk_closure(mk_int(k1 * k2 ),NULL); return;
 	case DIV:   assert(k2!=0);
@@ -295,6 +366,22 @@ void step(struct configuration *conf){
 	case AND:   conf->closure = mk_closure(mk_int(k1 && k2),NULL); return;
 	default:    ;
 	}
+      }
+      if(conf->closure->expr->type==POINT){
+         c2 = conf->closure->expr;
+         printf("2e argument : ");
+         print_point(c2);
+         printf("\n");
+
+         switch (expr->expr->op){
+            case SETCENTRE: conf->closure = mk_closure(set_centre(c1,c2),NULL); return;
+            case SETPOINT1: conf->closure = mk_closure(set_point(c1,c2,1),NULL); return;
+            case SETPOINT2: conf->closure = mk_closure(set_point(c1,c2,2),NULL); return;
+            case SETPOINT3: conf->closure = mk_closure(set_point(c1,c2,3),NULL); return;
+            case SETPOINT4: conf->closure = mk_closure(set_point(c1,c2,4),NULL); return;
+            default: ;
+         }
+
       }
       if(conf->closure->expr->type==CELL){
 	//printf("9\n");

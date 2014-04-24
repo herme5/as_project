@@ -48,6 +48,9 @@ struct env * get_env(){
 
 %token T_REC
 
+%token T_CIRCLE
+%token T_BEZIER
+
 %type<t_exp> e
 %type<t_exp> f
 %type<t_exp> p
@@ -97,14 +100,14 @@ s :
   environment = push_rec_env($var,$expr,environment);
   conf->closure = mk_closure($expr,environment);
   conf->stack=NULL; //step(conf);
-  printf(">>> "); print_expr(conf->closure->expr); printf("\n");}
+  /*printf(">>> "); print_expr(conf->closure->expr); printf("\n");*/}
 
 | s T_LET T_ID[var] '=' e[expr] EOE {
   struct closure * cl = mk_closure($expr,environment);
   conf->closure = cl;
   conf->stack=NULL; //step(conf);
   environment = push_env($var,cl,environment);
-  printf(">>> "); print_expr(conf->closure->expr); printf("\n");}
+  /*printf(">>> "); print_expr(conf->closure->expr); printf("\n");*/}
 ;
 
 
@@ -116,6 +119,15 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 
 | '(' '-' e ')' {$$ = mk_app(mk_app(mk_op(MINUS),mk_int(0)),$3);}
 | '(' e ')'     {$$ = $2;}
+
+//Point
+| '{' e ',' e '}' {$$ = mk_point(); $$ = mk_app(mk_app(mk_op(SETABS),$$),$2); $$ = mk_app(mk_app(mk_op(SETORD),$$),$4);}
+
+//cercle
+| T_CIRCLE'('e','e')' {$$ = mk_circle(); $$ = mk_app(mk_app(mk_op(SETCENTRE),$$),$3); $$ = mk_app(mk_app(mk_op(SETRAYON),$$),$5);}
+
+//courbe de bezier
+| T_BEZIER'('e','e','e','e')' {$$ = mk_bezier(); $$ = mk_app(mk_app(mk_op(SETPOINT1),$$),$3); $$ = mk_app(mk_app(mk_op(SETPOINT2),$$),$5); $$ = mk_app(mk_app(mk_op(SETPOINT3),$$),$7); $$ = mk_app(mk_app(mk_op(SETPOINT4),$$),$9);}
 
 | e T_AND e   {$$ = mk_app(mk_app(mk_op(AND),$1),$3);}
 | e T_OR e    {$$ = mk_app(mk_app(mk_op(OR),$1),$3);}
