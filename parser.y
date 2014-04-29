@@ -29,6 +29,7 @@ struct env * get_env(){
 %token T_ARROW
 %token T_IN
 %token T_WHERE
+%token T_DRAW
 
 %token T_CONS
 %token T_TAIL
@@ -125,13 +126,13 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | '(' '-' e ')' {$$ = mk_app(mk_app(mk_op(MINUS),mk_int(0)),$3);}
 | '(' e ')'     {$$ = $2;}
 
-//Point
+//POINT
 | '{' e ',' e '}' {$$ = mk_point(); $$ = mk_app(mk_app(mk_op(SETABS),$$),$2); $$ = mk_app(mk_app(mk_op(SETORD),$$),$4);}
 
-//cercle
+//CERCLE
 | T_CIRCLE'('e','e')' {$$ = mk_circle(); $$ = mk_app(mk_app(mk_op(SETCENTRE),$$),$3); $$ = mk_app(mk_app(mk_op(SETRAYON),$$),$5);}
 
-//courbe de bezier
+//COURBE DE BEZIER
 | T_BEZIER'('e','e','e','e')' {$$ = mk_bezier(); $$ = mk_app(mk_app(mk_op(SETPOINT1),$$),$3); $$ = mk_app(mk_app(mk_op(SETPOINT2),$$),$5); $$ = mk_app(mk_app(mk_op(SETPOINT3),$$),$7); $$ = mk_app(mk_app(mk_op(SETPOINT4),$$),$9);}
 
 //PATH
@@ -143,7 +144,7 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 //ROTATION
 | T_ROTAT '(' e ',' e ',' e ')' {$$ = mk_app(mk_app(mk_app(mk_op(ROTATION),$3),$5),$7);}
 
-//HOMOTETHIE
+//HOMOTHETIE
 | T_HOMOT '(' e ',' e ',' e ')' {$$ = mk_app(mk_app(mk_app(mk_op(HOMOTHETIE),$3),$5),$7);}
 
 | e T_AND e   {$$ = mk_app(mk_app(mk_op(AND),$1),$3);}
@@ -156,6 +157,7 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | e T_GEQ e   {$$ = mk_app(mk_app(mk_op(GEQ),$1),$3);}
 | e T_EQ e    {$$ = mk_app(mk_app(mk_op(EQ),$1),$3);}
 | T_NUM       {$$ = mk_int($1);}
+//| T_DRAW e    {;}
 
 | T_IF e T_THEN e T_ELSE e {$$ = mk_cond($2,$4,$6);}
 | T_ID                     {$$=mk_id($1);}

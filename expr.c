@@ -27,8 +27,8 @@ struct expr *mk_fun(char *id, struct expr *body){
 struct expr *mk_app(struct expr *fun, struct expr *arg){
   struct expr *e = mk_node();
   e->type = APP;
-  e->expr->app.fun=fun;
-  e->expr->app.arg=arg;
+  e->expr->app.fun = fun;
+  e->expr->app.arg = arg;
   return e;
 }
 
@@ -56,21 +56,21 @@ struct expr *mk_cond(struct expr *cond, struct expr *then_br, struct expr *else_
 }
 
 struct expr *mk_circle(){
-   struct expr *e = mk_node();
-   e->type=CIRCLE;
-   return e;
+  struct expr *e = mk_node();
+  e->type=CIRCLE;
+  return e;
 }
 
 struct expr *mk_bezier(){
-   struct expr *e = mk_node();
-   e->type=BEZIER;
-   return e;
+  struct expr *e = mk_node();
+  e->type = BEZIER;
+  return e;
 }
 
 struct expr *mk_point(){
-   struct expr *e = mk_node();
-   e->type=POINT;
-   return e;
+  struct expr *e = mk_node();
+  e->type = POINT;
+  return e;
 }
 
 struct expr *mk_cell(struct expr *car, struct expr *cdr){
@@ -82,30 +82,29 @@ struct expr *mk_cell(struct expr *car, struct expr *cdr){
 }
 
 struct expr *mk_path(struct expr *car, struct expr *cdr){
-   struct expr *res = mk_node();
-   res->type = PATH;
-   res->expr->cell.car=car;
-   res->expr->cell.cdr=cdr;
-   return res;
+  struct expr *res = mk_node();
+  res->type = PATH;
+  res->expr->cell.car = car;
+  res->expr->cell.cdr = cdr;
+  return res;
 }
 
 struct expr *mk_head(struct expr *list){
   struct expr *res = mk_node();
-  if (list->expr->cell.car == NULL){
+  if (list->expr->cell.car == NULL)
     return mk_nil();
-  }
   res = list->expr->cell.car;
   return res;
 }
 
 struct expr *mk_headn(struct expr * list, struct expr * num){
-  struct expr *templist = list;
+  struct expr *tmp_list = list;
   int nb = num->expr->num;
   while (nb > 0){
-    templist = mk_tail(templist);
+    tmp_list = mk_tail(tmp_list);
     nb--;
   }
-  return mk_head(templist);
+  return mk_head(tmp_list);
 }
 
 struct expr *mk_tail(struct expr *list){
@@ -119,7 +118,7 @@ struct expr *mk_tail(struct expr *list){
 
 struct expr *mk_nil(){
   struct expr *res = mk_node();
-  res->type= NIL;
+  res->type = NIL;
   return res;
 }
 
@@ -128,14 +127,10 @@ struct expr *mk_append(struct expr *list1, struct expr *list2){
   return mk_reverse(revlist1, list2);
 }
 
-struct expr *mk_reverse(struct expr *list, struct expr *finallist){
-  if (list->type == NIL || list->expr->cell.cdr == NULL){
-    return finallist;
-  }
+struct expr *mk_reverse(struct expr *list, struct expr *res){
+  if (list->type == NIL || list->expr->cell.cdr == NULL)
+    return res;
   else{
-    return (mk_reverse(mk_tail(list),mk_cell(mk_head(list),finallist)));
+    return (mk_reverse(mk_tail(list),mk_cell(mk_head(list),res)));
   }
 }
-
-//fold f [a0, a1, ..., an] b
-//(f an (...(f a2(f a1 a0)) ...))

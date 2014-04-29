@@ -30,8 +30,8 @@ tl    {return T_TAIL;}
 Cercle {return T_CIRCLE;}
 cercle {return T_CIRCLE;}
 
-bezier {return T_BEZIER;}
 Bezier {return T_BEZIER;}
+bezier {return T_BEZIER;}
 
 Translation {return T_TRANSLAT;}
 translation {return T_TRANSLAT;}
@@ -41,6 +41,8 @@ rotation {return T_ROTAT;}
 
 Homothetie {return T_HOMOT;}
 homothetie {return T_HOMOT;}
+
+draw {return T_DRAW;}
 
 <INITIAL>print[[:space:]]*\" {c = malloc(10000*sizeof(char)); BEGIN PRINT;}
 

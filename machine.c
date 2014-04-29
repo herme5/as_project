@@ -72,44 +72,47 @@ struct stack *push_stack(struct closure *cl, struct stack *stack){
 void print_list(struct expr *list){
   printf("{");
   struct expr *tmp = list;
-  if (tmp != NULL){
-    while(tmp->expr->cell.cdr != NULL){
-      print_expr(tmp->expr->cell.car);
-      tmp = (tmp->expr->cell.cdr);
-      if (tmp->expr->cell.car != NULL){
-         printf(", ");
-      }
-    }
+
+  if (tmp == NULL)
+    return ;
+  
+  while(tmp->expr->cell.cdr != NULL){
+    print_expr(tmp->expr->cell.car);
+    tmp = (tmp->expr->cell.cdr);
+    if (tmp->expr->cell.car != NULL)
+      printf(", ");
   }
   printf("}");
 }
 
 void print_path(struct expr *path){
   struct expr *tmp = path;
-  if (tmp != NULL){
-    while(tmp->expr->cell.cdr != NULL){
-      print_expr(tmp->expr->cell.car);
-      tmp = (tmp->expr->cell.cdr);
-      printf("--");
-    }
+  if (tmp == NULL)
+    return ;
+
+  while(tmp->expr->cell.cdr != NULL){
     print_expr(tmp->expr->cell.car);
+    tmp = (tmp->expr->cell.cdr);
+    printf("--");
   }
+  print_expr(tmp->expr->cell.car);
 }
 
 void print_expr(struct expr *expr){
   switch(expr->type){
-  case CELL: print_list(expr);return;
-  case NUM: printf("%d",expr->expr->num);return;
-  case FUN: printf("fun(%s)->",expr->expr->fun.id);print_expr(expr->expr->fun.body);return;
-  case ID : printf("%s",expr->expr->id);return;
-  case APP : print_app(expr);return;
-  case OP : print_op(expr);return;
-  case COND : print_cond(expr);return;
-  case NIL : printf ("NIL");return;
-  case POINT : print_point(expr);return;
-  case CIRCLE : print_circle(expr);return;
-  case BEZIER : print_bezier(expr);return;
-  case PATH : print_path(expr);return;
+  case CELL  : print_list(expr); return;
+  case NUM   : printf("%d",expr->expr->num); return;
+  case FUN   : printf("fun(%s)->", expr->expr->fun.id);
+               print_expr(expr->expr->fun.body); return;
+  case ID    : printf("%s",expr->expr->id); return;
+  case APP   : print_app(expr); return;
+  case OP    : print_op(expr); return;
+  case COND  : print_cond(expr); return;
+  case NIL   : printf ("NIL"); return;
+  case POINT : print_point(expr); return;
+  case CIRCLE: print_circle(expr); return;
+  case BEZIER: print_bezier(expr); return;
+  case PATH  : print_path(expr); return;
   default : printf("non reconnu");
   }
 }
@@ -133,7 +136,7 @@ void print_circle(struct expr *circle){
 }
 
 void print_point(struct expr *point){
-   printf("(%d,%d)",point->expr->point.abs,point->expr->point.ord);
+   printf("(%d, %d)", point->expr->point.abs,point->expr->point.ord);
 }
 
 void print_cond(struct expr *cond){
@@ -148,77 +151,85 @@ void print_cond(struct expr *cond){
 
 void print_app(struct expr *app){
   if (app->expr->app.fun->type == OP){
-     print_expr(app->expr->app.arg);printf(" ");print_expr(app->expr->app.fun);
+     print_expr(app->expr->app.arg);
+     printf(" ");
+     print_expr(app->expr->app.fun);
   }
-  else{
-    print_expr(app->expr->app.fun);printf(" ");print_expr(app->expr->app.arg);
+  else {
+    print_expr(app->expr->app.fun);
+    printf(" ");
+    print_expr(app->expr->app.arg);
   }
 }
 
 
 void print_op(struct expr *op){
   switch(op->expr->op){
-  case PLUS: printf("+");return;
-  case MINUS: printf("-");return;
-  case MULT: printf("*");return;
-  case DIV: printf("/");return;
-  case MOD: printf("mod");return;
-  case LEQ: printf("<=");return;
-  case LE: printf("<");return;
-  case GEQ: printf(">=");return;
-  case GE: printf(">");return;
-  case EQ: printf("==");return;
-  case OR: printf("||");return;
-  case AND: printf("&&");return;
-  case NOT: printf("!");return;
-  case CONS: printf("cons");return;
-  case HEAD: printf("head");return;
-  case TAIL: printf("tail");return;
+  case PLUS : printf("+"); return;
+  case MINUS: printf("-"); return;
+  case MULT : printf("*"); return;
+  case DIV  : printf("/"); return;
+  case MOD  : printf("mod"); return;
+  case LEQ  : printf("<="); return;
+  case LE   : printf("<"); return;
+  case GEQ  : printf(">="); return;
+  case GE   : printf(">"); return;
+  case EQ   : printf("=="); return;
+  case OR   : printf("||"); return;
+  case AND  : printf("&&"); return;
+  case NOT  : printf("!"); return;
+  case CONS : printf("cons"); return;
+  case HEAD : printf("head"); return;
+  case TAIL : printf("tail"); return;
+  default : assert(0);
   }
 }
 
-int list_equal(struct expr* l1, struct expr* l2){
-   if (l1 == NULL && l2 == NULL){
-      return 1;
-   }
-   if (l1 == NULL || l2 == NULL){
-      return 0;
-   }
-   if (l1->expr->cell.car == NULL && l2->expr->cell.car == NULL){
-      return 1;
-   }
-   if (l1->expr->cell.car == NULL || l2->expr->cell.car == NULL){
-      return 0;
-   }
-   if (element_equal(l1->expr->cell.car,l2->expr->cell.car)){
-      return list_equal(l1->expr->cell.cdr, l2->expr->cell.cdr);
-   }
-   return 0;
+int list_equal(struct expr *l1, struct expr *l2){
+  if (l1 == NULL && l2 == NULL)
+    return 1;
+  
+  if (l1 == NULL || l2 == NULL)
+    return 0;
+  
+  if (l1->expr->cell.car == NULL && l2->expr->cell.car == NULL)
+    return 1;
+  
+  if (l1->expr->cell.car == NULL || l2->expr->cell.car == NULL)
+    return 0;
+  
+  if (element_equal(l1->expr->cell.car, l2->expr->cell.car))
+    return list_equal(l1->expr->cell.cdr, l2->expr->cell.cdr);
+  
+  return 0;
 }
 
-int element_equal(struct expr* e1, struct expr* e2){
-   assert (e1->type == e2->type);
-   assert (e1->type == NUM || e1->type == CELL);
-   switch (e1->type){
-      case NUM: return e1->expr->num == e2->expr->num;
-      case CELL: return list_equal(e1,e2);
-      default : return 0;
-   }
+int element_equal(struct expr *e1, struct expr *e2){
+  
+  int bool_1 = e1->type == e2->type;
+  int bool_2 = e1->type == NUM || e1->type == CELL;
+  assert (bool_1 && bool_2);
+
+  switch (e1->type){
+  case NUM : return e1->expr->num == e2->expr->num;
+  case CELL: return list_equal(e1,e2);
+  default  : return 0;
+  }
 }
 
 int get_num(struct configuration * conf){
   step(conf);
-  assert(conf->closure->expr->type==NUM);
+  assert(conf->closure->expr->type == NUM);
   return conf->closure->expr->expr->num;
 }
 
 struct cell get_cell(struct configuration * conf){
   step(conf);
-  assert(conf->closure->expr->type==CELL);
+  assert(conf->closure->expr->type == CELL);
   return conf->closure->expr->expr->cell;
 }
 
-struct expr* set_abs(struct expr* point,int abs){
+struct expr *set_abs(struct expr* point,int abs){
    point->expr->point.abs = abs;
    return point;
 }
@@ -238,138 +249,144 @@ struct expr* set_centre(struct expr* cercle,struct expr *point){
 }
 
 struct expr* set_point(struct expr* bezier,struct expr *point,int pos){
-   switch (pos){
-      case 1: bezier->expr->bezier.point1 = point; break;
-      case 2: bezier->expr->bezier.point2 = point; break;
-      case 3: bezier->expr->bezier.point3 = point; break;
-      case 4: bezier->expr->bezier.point4 = point; break;
-   }
-   return bezier;
+  switch (pos){
+  case 1: bezier->expr->bezier.point1 = point; break;
+  case 2: bezier->expr->bezier.point2 = point; break;
+  case 3: bezier->expr->bezier.point3 = point; break;
+  case 4: bezier->expr->bezier.point4 = point; break;
+  }
+  return bezier;
 }
 
 struct expr* translation(struct expr* elem, struct expr* vecteur){
-   struct expr* tmp = elem;
-   int x = vecteur->expr->point.abs;
-   int y = vecteur->expr->point.ord;
-   int tmp_x;
-   int tmp_y;
-   assert (vecteur->type==POINT);
-   switch (elem->type){
-      case POINT: 
-	tmp_x = elem->expr->point.abs;
-	tmp_y = elem->expr->point.ord;
-	elem = mk_point();
-	elem = set_abs(elem, tmp_x+x);
-	elem = set_ord(elem, tmp_y+y);
-	break;
+  struct expr* tmp = elem;
+  int x = vecteur->expr->point.abs;
+  int y = vecteur->expr->point.ord;
+  int tmp_x;
+  int tmp_y;
+  assert (vecteur->type==POINT);
+  switch (elem->type){
+  case POINT: 
+    tmp_x = elem->expr->point.abs;
+    tmp_y = elem->expr->point.ord;
+    elem = mk_point();
+    elem = set_abs(elem, tmp_x+x);
+    elem = set_ord(elem, tmp_y+y);
+    break;
 
-      case PATH: do {
-	tmp->expr->cell.car = translation(tmp->expr->cell.car, vecteur);
-	tmp = tmp->expr->cell.cdr;
-               } while(tmp->expr->cell.cdr != NULL);
-         break;
+  case PATH: do {
+      tmp->expr->cell.car = translation(tmp->expr->cell.car, vecteur);
+      tmp = tmp->expr->cell.cdr;
+    } while(tmp->expr->cell.cdr != NULL);
+    break;
 
-      case CIRCLE:
-         elem->expr->circle.centre = translation(elem->expr->circle.centre, vecteur);
-         break;
+  case CIRCLE:
+    elem->expr->circle.centre = translation(elem->expr->circle.centre, vecteur);
+    break;
 
-      case BEZIER:
-         elem->expr->bezier.point1 = translation(elem->expr->bezier.point1, vecteur);
-         elem->expr->bezier.point2 = translation(elem->expr->bezier.point2, vecteur);
-         elem->expr->bezier.point3 = translation(elem->expr->bezier.point3, vecteur);
-         elem->expr->bezier.point4 = translation(elem->expr->bezier.point4, vecteur);
-         break;
+  case BEZIER:
+    elem->expr->bezier.point1 = translation(elem->expr->bezier.point1, vecteur);
+    elem->expr->bezier.point2 = translation(elem->expr->bezier.point2, vecteur);
+    elem->expr->bezier.point3 = translation(elem->expr->bezier.point3, vecteur);
+    elem->expr->bezier.point4 = translation(elem->expr->bezier.point4, vecteur);
+    break;
 
-      default: assert(0);
-   }
-   return elem;
+  default: assert(0);
+  }
+  return elem;
 }
 
 struct expr* rotation(struct expr* elem, struct expr* centre, struct expr* angle){
-   struct expr* tmp = elem;
-   int x = centre->expr->point.abs;
-   int y = centre->expr->point.ord;
-   int tmp_x;
-   int tmp_y;
-   int angl = angle->expr->num;
-   assert (centre->type==POINT && angle->type==NUM);
-   switch (elem->type){
-      case POINT: 
-	tmp_x = elem->expr->point.abs;
-	tmp_y = elem->expr->point.ord;
-	elem = mk_point();
-	float abs = (cos(to_radian(angl)) * (tmp_x-x) - sin(to_radian(angl)) * (tmp_y-y) + x);
-	float ord = (sin(to_radian(angl)) * (tmp_x-x) + cos(to_radian(angl)) * (tmp_y-y) + y);
-	elem = set_abs(elem,(int)abs);
-	elem = set_ord(elem,(int)ord);
-	break;
+  assert (centre->type == POINT && angle->type == NUM);
 
-      case PATH: do {
-	tmp->expr->cell.car = rotation(tmp->expr->cell.car, centre, angle);
-	tmp = tmp->expr->cell.cdr;
-               } while(tmp->expr->cell.cdr != NULL);
-         break;
+  struct expr* tmp = elem;
+  int x = centre->expr->point.abs;
+  int y = centre->expr->point.ord;
+  int tmp_x;
+  int tmp_y;
+  int a = angle->expr->num;
 
-      case CIRCLE:
-         elem->expr->circle.centre = rotation(elem->expr->circle.centre, centre, angle);
-         break;
+  switch (elem->type){
+  case POINT: 
+    tmp_x = elem->expr->point.abs;
+    tmp_y = elem->expr->point.ord;
+    elem = mk_point();
+    float abs = (cos(to_radian(a)) * (tmp_x - x) - sin(to_radian(a)) * (tmp_y - y) + x);
+    float ord = (sin(to_radian(a)) * (tmp_x - x) + cos(to_radian(a)) * (tmp_y - y) + y);
+    elem = set_abs(elem,(int)abs);
+    elem = set_ord(elem,(int)ord);
+    break;
 
-      case BEZIER:
-         elem->expr->bezier.point1 = rotation(elem->expr->bezier.point1, centre, angle);
-         elem->expr->bezier.point2 = rotation(elem->expr->bezier.point2, centre, angle);
-         elem->expr->bezier.point3 = rotation(elem->expr->bezier.point3, centre, angle);
-         elem->expr->bezier.point4 = rotation(elem->expr->bezier.point4, centre, angle);
-         break;
+  case PATH:
+    do {
+      tmp->expr->cell.car = rotation(tmp->expr->cell.car, centre, angle);
+      tmp = tmp->expr->cell.cdr;
+    } while(tmp->expr->cell.cdr != NULL);
+    break;
 
-      default: assert(0);
-   }
-   return elem;
+  case CIRCLE:
+    elem->expr->circle.centre = rotation(elem->expr->circle.centre, centre, angle);
+    break;
+
+  case BEZIER:
+    elem->expr->bezier.point1 = rotation(elem->expr->bezier.point1, centre, angle);
+    elem->expr->bezier.point2 = rotation(elem->expr->bezier.point2, centre, angle);
+    elem->expr->bezier.point3 = rotation(elem->expr->bezier.point3, centre, angle);
+    elem->expr->bezier.point4 = rotation(elem->expr->bezier.point4, centre, angle);
+    break;
+
+  default: return;
+  }
+  return elem;
 }
 
-struct expr* homotethie(struct expr* elem, struct expr* centre, struct expr* ratio){
-   struct expr* tmp = elem;
-   int x = centre->expr->point.abs;
-   int y = centre->expr->point.ord;
-   int tmp_x;
-   int tmp_y;
-   int rat = ratio->expr->num;
-   assert (centre->type==POINT && ratio ->type==NUM);
-   switch (elem->type){
-      case POINT: 
-	tmp_x = elem->expr->point.abs;
-	tmp_y = elem->expr->point.ord;
-	elem = mk_point();
-	float abs = (rat*(tmp_x-x)+x);
-	float ord = (rat*(tmp_y-y)+y);
-	elem = set_abs(elem,(int)abs);
-	elem = set_ord(elem,(int)ord);
-	break;
+struct expr *homothetie(struct expr *elem, struct expr *centre, struct expr *ratio){
+  assert (centre->type == POINT && ratio->type == NUM);
 
-      case PATH: do {
-	tmp->expr->cell.car = rotation(tmp->expr->cell.car, centre, ratio);
-	tmp = tmp->expr->cell.cdr;
-               } while(tmp->expr->cell.cdr != NULL);
-         break;
+  struct expr *tmp = elem;
+  int x = centre->expr->point.abs;
+  int y = centre->expr->point.ord;
+  int tmp_x;
+  int tmp_y;
+  int r = ratio->expr->num;
 
-      case CIRCLE:
-         elem->expr->circle.centre = rotation(elem->expr->circle.centre, centre, ratio);
-         break;
+  switch (elem->type){
+  case POINT: 
+    tmp_x = elem->expr->point.abs;
+    tmp_y = elem->expr->point.ord;
+    elem = mk_point();
+    float abs = (r * (tmp_x - x) + x);
+    float ord = (r * (tmp_y - y) + y);
+    elem = set_abs(elem, (int)abs);
+    elem = set_ord(elem, (int)ord);
+    break;
 
-      case BEZIER:
-         elem->expr->bezier.point1 = rotation(elem->expr->bezier.point1, centre, ratio);
-         elem->expr->bezier.point2 = rotation(elem->expr->bezier.point2, centre, ratio);
-         elem->expr->bezier.point3 = rotation(elem->expr->bezier.point3, centre, ratio);
-         elem->expr->bezier.point4 = rotation(elem->expr->bezier.point4, centre, ratio);
-         break;
+  case PATH: 
+    do {
+      tmp->expr->cell.car = rotation(tmp->expr->cell.car, centre, ratio);
+      tmp = tmp->expr->cell.cdr;
+    } while(tmp->expr->cell.cdr != NULL);
+    break;
 
-      default: assert(0);
-   }
-   return elem;
+  case CIRCLE:
+    elem->expr->circle.centre = rotation(elem->expr->circle.centre, centre, ratio);
+    break;
+
+  case BEZIER:
+    elem->expr->bezier.point1 = rotation(elem->expr->bezier.point1, centre, ratio);
+    elem->expr->bezier.point2 = rotation(elem->expr->bezier.point2, centre, ratio);
+    elem->expr->bezier.point3 = rotation(elem->expr->bezier.point3, centre, ratio);
+    elem->expr->bezier.point4 = rotation(elem->expr->bezier.point4, centre, ratio);
+    break;
+
+  default: return;
+  }
+  return elem;
 }
 
 float to_radian(int angle){
-	float res = angle * M_PI /180;
-	return res;
+  float res = angle * M_PI /180;
+  return res;
 }
 
 void step(struct configuration *conf){
@@ -377,9 +394,10 @@ void step(struct configuration *conf){
   struct env *env = conf->closure->env;
   struct stack *stack = conf->stack;
   assert(expr!=NULL);
+  
   switch (expr->type){
   case FUN:
-    {// printf("fun\n");
+    {
       if(stack==NULL){return;}
       char *var = expr->expr->fun.id;
       struct expr *body = expr->expr->fun.body;
@@ -434,45 +452,41 @@ void step(struct configuration *conf){
     return;
   case OP:
     {
-      //printf("1\n");
       struct stack *stack = conf->stack;
-
       if(stack == NULL){return;}
-      //printf("2\n");
       struct closure *arg1 = stack->closure;
       stack = pop_stack(stack);
       conf->closure = arg1;
       conf->stack = NULL;
       step(conf);
-      //printf("3\n");
+
       int k1, k2;
       struct expr * e1 = conf->closure->expr;
-      //printf("e = %d\n", e1->expr->num);
       struct expr * c1,* c2;
-      if(conf->closure->expr->type==NUM){
+      
+      if(conf->closure->expr->type == NUM){
 	k1 = get_num(conf);
 	switch(expr->expr->op){
-	case NOT: conf->closure->expr->expr->num = !k1; return;
-	default: ;
+	case NOT : conf->closure->expr->expr->num = !k1; return;
+	default : ;
 	}
       }
-      if(conf->closure->expr->type==POINT){
-         c1 = conf->closure->expr;
-         if (expr->expr->op == ADDPATH && stack==NULL){
-            conf->closure = mk_closure(mk_path(c1,NULL),NULL);return;
-         }
+      if(conf->closure->expr->type == POINT){
+	c1 = conf->closure->expr;
+	if (expr->expr->op == ADDPATH && stack==NULL){
+	  conf->closure = mk_closure(mk_path(c1,NULL),NULL);return;
+	}
       }
-      if(conf->closure->expr->type==CIRCLE){
-         c1 = conf->closure->expr;
+      if(conf->closure->expr->type == CIRCLE){
+	c1 = conf->closure->expr;
       }
-      if(conf->closure->expr->type==BEZIER){
-         c1 = conf->closure->expr;
+      if(conf->closure->expr->type == BEZIER){
+	c1 = conf->closure->expr;
       }
-      if(conf->closure->expr->type==PATH){
-         c1 = conf->closure->expr;
+      if(conf->closure->expr->type == PATH){
+	c1 = conf->closure->expr;
       }
-      if(conf->closure->expr->type==CELL){
-	//printf("5\n");
+      if(conf->closure->expr->type == CELL){
 	c1 = conf->closure->expr;
 	switch(expr->expr->op){
 	case HEAD: conf->closure = mk_closure(mk_head(conf->closure->expr),NULL); return;
@@ -480,94 +494,88 @@ void step(struct configuration *conf){
 	default: ;
 	}
       }
-
+      
       if(stack == NULL){return;}
-      //printf("6\n");
-      arg1=conf->closure;
+      arg1 = conf->closure;
       struct closure *arg2 = stack->closure;
       stack = pop_stack(stack);
       conf->closure = arg2;
       conf->stack = NULL;
       step(conf);
-      //printf("7\n");
-      if(conf->closure->expr->type==NUM){
-         //printf("8\n");
+      
+      if(conf->closure->expr->type == NUM){
 	k2 = get_num(conf);
 	switch (expr->expr->op){
-    case SETABS: conf->closure = mk_closure(set_abs(c1,k2),NULL); return;
+	case SETABS:   conf->closure = mk_closure(set_abs(c1,k2),NULL);return;
+	case SETORD:   conf->closure = mk_closure(set_ord(c1,k2),NULL);return;
+	case SETRAYON: conf->closure = mk_closure(set_rayon(c1,k2),NULL);return;
 
-    case SETORD: conf->closure = mk_closure(set_ord(c1,k2),NULL); return;
-
-    case SETRAYON: conf->closure = mk_closure(set_rayon(c1,k2),NULL);return;
-
-    case PLUS:  conf->closure = mk_closure(mk_int(k1 + k2 ),NULL); return;
-	case MINUS: conf->closure = mk_closure(mk_int(k1 - k2 ),NULL); return;
-	case MULT:  conf->closure = mk_closure(mk_int(k1 * k2 ),NULL); return;
+	case PLUS:  conf->closure = mk_closure(mk_int(k1 + k2 ),NULL);return;
+	case MINUS: conf->closure = mk_closure(mk_int(k1 - k2 ),NULL);return;
+	case MULT:  conf->closure = mk_closure(mk_int(k1 * k2 ),NULL);return;
 	case DIV:   assert(k2!=0);
-	            conf->closure = mk_closure(mk_int(k1 /  k2),NULL); return;
-	case MOD:   conf->closure = mk_closure(mk_int(k1 %  k2),NULL); return;
-	case LEQ:   conf->closure = mk_closure(mk_int(k1 <= k2),NULL); return;
-	case LE:    conf->closure = mk_closure(mk_int(k1 <  k2),NULL); return;
-	case GEQ:   conf->closure = mk_closure(mk_int(k1 >= k2),NULL); return;
-	case GE:    conf->closure = mk_closure(mk_int(k1 >  k2),NULL); return;
-	case EQ:    conf->closure = mk_closure(mk_int(k1 == k2),NULL); return;
-	case OR:    conf->closure = mk_closure(mk_int(k1 || k2),NULL); return;
-	case AND:   conf->closure = mk_closure(mk_int(k1 && k2),NULL); return;
+	            conf->closure = mk_closure(mk_int(k1 /  k2),NULL);return;
+	case MOD:   conf->closure = mk_closure(mk_int(k1 %  k2),NULL);return;
+	case LEQ:   conf->closure = mk_closure(mk_int(k1 <= k2),NULL);return;
+	case LE:    conf->closure = mk_closure(mk_int(k1 <  k2),NULL);return;
+	case GEQ:   conf->closure = mk_closure(mk_int(k1 >= k2),NULL);return;
+	case GE:    conf->closure = mk_closure(mk_int(k1 >  k2),NULL);return;
+	case EQ:    conf->closure = mk_closure(mk_int(k1 == k2),NULL);return;
+	case OR:    conf->closure = mk_closure(mk_int(k1 || k2),NULL);return;
+	case AND:   conf->closure = mk_closure(mk_int(k1 && k2),NULL);return;
 	default:    ;
 	}
       }
-      if(conf->closure->expr->type==POINT){
-         c2 = conf->closure->expr;
-         switch (expr->expr->op){
-            case SETCENTRE: conf->closure = mk_closure(set_centre(c1,c2),NULL); return;
-            case SETPOINT1: conf->closure = mk_closure(set_point(c1,c2,1),NULL); return;
-            case SETPOINT2: conf->closure = mk_closure(set_point(c1,c2,2),NULL); return;
-            case SETPOINT3: conf->closure = mk_closure(set_point(c1,c2,3),NULL); return;
-            case SETPOINT4: conf->closure = mk_closure(set_point(c1,c2,4),NULL); return;
-	    case TRANSLATION: conf->closure = mk_closure(translation(c1,c2),NULL); return;
-            default: ;
-         }
 
-      }
-      if(conf->closure->expr->type==CELL){
-	//printf("9\n");
+      if(conf->closure->expr->type == POINT){
 	c2 = conf->closure->expr;
-	//printf("10\n");
-
-	//print_list(conf->closure->expr);
-
 	switch (expr->expr->op){
-	case CONS:  conf->closure = mk_closure(mk_cell(e1,c2),NULL); return;
-	case APPEND: conf->closure = mk_closure(mk_append(c1,c2),NULL); return;
-	case HEADN: conf->closure = mk_closure(mk_headn(c2, e1),NULL); return;
-       case EQ: conf->closure = mk_closure(mk_int(list_equal(c1,c2)),NULL); return;
-	default:    assert(0);
+	case SETCENTRE: conf->closure = mk_closure(set_centre(c1,c2),NULL);return;
+	case SETPOINT1: conf->closure = mk_closure(set_point(c1,c2,1),NULL);return;
+	case SETPOINT2: conf->closure = mk_closure(set_point(c1,c2,2),NULL);return;
+	case SETPOINT3: conf->closure = mk_closure(set_point(c1,c2,3),NULL);return;
+	case SETPOINT4: conf->closure = mk_closure(set_point(c1,c2,4),NULL);return;
+	case TRANSLATION: conf->closure = mk_closure(translation(c1,c2),NULL);return;
+	default: ;
 	}
       }
-      if (conf->closure->expr->type==PATH){
+
+      if(conf->closure->expr->type == CELL){
+	c2 = conf->closure->expr;
+	switch (expr->expr->op){
+	case CONS:   conf->closure = mk_closure(mk_cell(e1,c2),NULL);return;
+	case APPEND: conf->closure = mk_closure(mk_append(c1,c2),NULL);return;
+	case HEADN:  conf->closure = mk_closure(mk_headn(c2,e1),NULL);return;
+	case EQ:     conf->closure = mk_closure(mk_int(list_equal(c1,c2)),NULL);return;
+	default:     assert(0);
+	}
+      }
+      
+      if (conf->closure->expr->type == PATH){
          c2 = conf->closure->expr;
          switch (expr->expr->op){
-            case ADDPATH: conf->closure = mk_closure(mk_path(c1,c2),NULL);return;
-            default: assert(0);
+	 case ADDPATH: conf->closure = mk_closure(mk_path(c1,c2),NULL);return;
+	 default: assert(0);
          }
       }
-      //printf("10\n");
-	if(stack == NULL){return;}
-	arg2=conf->closure;
-	struct closure *arg3 = stack->closure;
-	stack = pop_stack(stack);
-	conf->closure = arg3;
-	conf->stack = NULL;
-      	step(conf);
-	if (conf->closure->expr->type==NUM){
-		struct expr* e3 = conf->closure->expr;
-		switch (expr->expr->op){
-			case ROTATION : conf->closure = mk_closure(rotation(c1,c2,e3),NULL); return;
-			case HOMOTHETIE : conf->closure = mk_closure(homotethie(c1,c2,e3),NULL); return;
-			default : assert(0);
-		}			
-	}
-	
+      
+      if(stack == NULL){return;}
+      arg2 = conf->closure;
+      struct closure *arg3 = stack->closure;
+      stack = pop_stack(stack);
+      conf->closure = arg3;
+      conf->stack = NULL;
+      step(conf);
+
+      if (conf->closure->expr->type==NUM){
+	struct expr* e3 = conf->closure->expr;
+	switch (expr->expr->op){
+	case ROTATION:   conf->closure = mk_closure(rotation(c1,c2,e3),NULL); return;
+	case HOMOTHETIE: conf->closure = mk_closure(homothetie(c1,c2,e3),NULL); return;
+	default : assert(0);
+	}			
+      }
+      
     }
     ;
   default: assert(0);
