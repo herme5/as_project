@@ -48,3 +48,8 @@ struct expr* set_ord(struct expr* point,int ord);
 struct expr* set_rayon(struct expr* cercle,int rayon);
 struct expr* set_centre(struct expr* cercle,struct expr *point);
 struct expr* set_point(struct expr* bezier,struct expr *point,int pos);
+
+struct expr* translation(struct expr* elem, struct expr* vecteur);
+struct expr* rotation(struct expr* elem, struct expr* centre, struct expr* angle);
+struct expr* homotethie(struct expr* elem, struct expr* centre, struct expr* ratio);
+float to_radian(int angle);

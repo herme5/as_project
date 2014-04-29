@@ -51,6 +51,10 @@ struct env * get_env(){
 %token T_CIRCLE
 %token T_BEZIER
 
+%token T_TRANSLAT
+%token T_ROTAT
+%token T_HOMOT
+
 %type<t_exp> e
 %type<t_exp> f
 %type<t_exp> p
@@ -132,6 +136,15 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 
 //PATH
 | '(' path ')' {$$ = $2;}
+
+//TRANSLATION
+| T_TRANSLAT '(' e ',' e ')' {$$ = mk_app(mk_app(mk_op(TRANSLATION),$3),$5);}
+
+//ROTATION
+| T_ROTAT '(' e ',' e ',' e ')' {$$ = mk_app(mk_app(mk_app(mk_op(ROTATION),$3),$5),$7);}
+
+//HOMOTETHIE
+| T_HOMOT '(' e ',' e ',' e ')' {$$ = mk_app(mk_app(mk_app(mk_op(HOMOTHETIE),$3),$5),$7);}
 
 | e T_AND e   {$$ = mk_app(mk_app(mk_op(AND),$1),$3);}
 | e T_OR e    {$$ = mk_app(mk_app(mk_op(OR),$1),$3);}

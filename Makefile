@@ -3,7 +3,7 @@ LEX=flex
 YACC=bison
 YFLAGS=-d -v -t
 CC=gcc
-LDLIBS=-ly
+LDLIBS=-ly -lm
 
 all: parser.result
 

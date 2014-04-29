@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
 #include "machine.h"
 
 #define MAX_CLOSURE 10000000000000000
@@ -246,6 +247,131 @@ struct expr* set_point(struct expr* bezier,struct expr *point,int pos){
    return bezier;
 }
 
+struct expr* translation(struct expr* elem, struct expr* vecteur){
+   struct expr* tmp = elem;
+   int x = vecteur->expr->point.abs;
+   int y = vecteur->expr->point.ord;
+   int tmp_x;
+   int tmp_y;
+   assert (vecteur->type==POINT);
+   switch (elem->type){
+      case POINT: 
+	tmp_x = elem->expr->point.abs;
+	tmp_y = elem->expr->point.ord;
+	elem = mk_point();
+	elem = set_abs(elem, tmp_x+x);
+	elem = set_ord(elem, tmp_y+y);
+	break;
+
+      case PATH: do {
+	tmp->expr->cell.car = translation(tmp->expr->cell.car, vecteur);
+	tmp = tmp->expr->cell.cdr;
+               } while(tmp->expr->cell.cdr != NULL);
+         break;
+
+      case CIRCLE:
+         elem->expr->circle.centre = translation(elem->expr->circle.centre, vecteur);
+         break;
+
+      case BEZIER:
+         elem->expr->bezier.point1 = translation(elem->expr->bezier.point1, vecteur);
+         elem->expr->bezier.point2 = translation(elem->expr->bezier.point2, vecteur);
+         elem->expr->bezier.point3 = translation(elem->expr->bezier.point3, vecteur);
+         elem->expr->bezier.point4 = translation(elem->expr->bezier.point4, vecteur);
+         break;
+
+      default: assert(0);
+   }
+   return elem;
+}
+
+struct expr* rotation(struct expr* elem, struct expr* centre, struct expr* angle){
+   struct expr* tmp = elem;
+   int x = centre->expr->point.abs;
+   int y = centre->expr->point.ord;
+   int tmp_x;
+   int tmp_y;
+   int angl = angle->expr->num;
+   assert (centre->type==POINT && angle->type==NUM);
+   switch (elem->type){
+      case POINT: 
+	tmp_x = elem->expr->point.abs;
+	tmp_y = elem->expr->point.ord;
+	elem = mk_point();
+	float abs = (cos(to_radian(angl)) * (tmp_x-x) - sin(to_radian(angl)) * (tmp_y-y) + x);
+	float ord = (sin(to_radian(angl)) * (tmp_x-x) + cos(to_radian(angl)) * (tmp_y-y) + y);
+	elem = set_abs(elem,(int)abs);
+	elem = set_ord(elem,(int)ord);
+	break;
+
+      case PATH: do {
+	tmp->expr->cell.car = rotation(tmp->expr->cell.car, centre, angle);
+	tmp = tmp->expr->cell.cdr;
+               } while(tmp->expr->cell.cdr != NULL);
+         break;
+
+      case CIRCLE:
+         elem->expr->circle.centre = rotation(elem->expr->circle.centre, centre, angle);
+         break;
+
+      case BEZIER:
+         elem->expr->bezier.point1 = rotation(elem->expr->bezier.point1, centre, angle);
+         elem->expr->bezier.point2 = rotation(elem->expr->bezier.point2, centre, angle);
+         elem->expr->bezier.point3 = rotation(elem->expr->bezier.point3, centre, angle);
+         elem->expr->bezier.point4 = rotation(elem->expr->bezier.point4, centre, angle);
+         break;
+
+      default: assert(0);
+   }
+   return elem;
+}
+
+struct expr* homotethie(struct expr* elem, struct expr* centre, struct expr* ratio){
+   struct expr* tmp = elem;
+   int x = centre->expr->point.abs;
+   int y = centre->expr->point.ord;
+   int tmp_x;
+   int tmp_y;
+   int rat = ratio->expr->num;
+   assert (centre->type==POINT && ratio ->type==NUM);
+   switch (elem->type){
+      case POINT: 
+	tmp_x = elem->expr->point.abs;
+	tmp_y = elem->expr->point.ord;
+	elem = mk_point();
+	float abs = (rat*(tmp_x-x)+x);
+	float ord = (rat*(tmp_y-y)+y);
+	elem = set_abs(elem,(int)abs);
+	elem = set_ord(elem,(int)ord);
+	break;
+
+      case PATH: do {
+	tmp->expr->cell.car = rotation(tmp->expr->cell.car, centre, ratio);
+	tmp = tmp->expr->cell.cdr;
+               } while(tmp->expr->cell.cdr != NULL);
+         break;
+
+      case CIRCLE:
+         elem->expr->circle.centre = rotation(elem->expr->circle.centre, centre, ratio);
+         break;
+
+      case BEZIER:
+         elem->expr->bezier.point1 = rotation(elem->expr->bezier.point1, centre, ratio);
+         elem->expr->bezier.point2 = rotation(elem->expr->bezier.point2, centre, ratio);
+         elem->expr->bezier.point3 = rotation(elem->expr->bezier.point3, centre, ratio);
+         elem->expr->bezier.point4 = rotation(elem->expr->bezier.point4, centre, ratio);
+         break;
+
+      default: assert(0);
+   }
+   return elem;
+}
+
+float to_radian(int angle){
+	float res = angle * M_PI /180;
+	return res;
+}
+
 void step(struct configuration *conf){
   struct expr *expr = conf->closure->expr;
   struct env *env = conf->closure->env;
@@ -398,6 +524,7 @@ void step(struct configuration *conf){
             case SETPOINT2: conf->closure = mk_closure(set_point(c1,c2,2),NULL); return;
             case SETPOINT3: conf->closure = mk_closure(set_point(c1,c2,3),NULL); return;
             case SETPOINT4: conf->closure = mk_closure(set_point(c1,c2,4),NULL); return;
+	    case TRANSLATION: conf->closure = mk_closure(translation(c1,c2),NULL); return;
             default: ;
          }
 
@@ -425,6 +552,22 @@ void step(struct configuration *conf){
          }
       }
       //printf("10\n");
+	if(stack == NULL){return;}
+	arg2=conf->closure;
+	struct closure *arg3 = stack->closure;
+	stack = pop_stack(stack);
+	conf->closure = arg3;
+	conf->stack = NULL;
+      	step(conf);
+	if (conf->closure->expr->type==NUM){
+		struct expr* e3 = conf->closure->expr;
+		switch (expr->expr->op){
+			case ROTATION : conf->closure = mk_closure(rotation(c1,c2,e3),NULL); return;
+			case HOMOTHETIE : conf->closure = mk_closure(homotethie(c1,c2,e3),NULL); return;
+			default : assert(0);
+		}			
+	}
+	
     }
     ;
   default: assert(0);

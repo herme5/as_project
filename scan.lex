@@ -33,6 +33,15 @@ cercle {return T_CIRCLE;}
 bezier {return T_BEZIER;}
 Bezier {return T_BEZIER;}
 
+Translation {return T_TRANSLAT;}
+translation {return T_TRANSLAT;}
+
+Rotation {return T_ROTAT;}
+rotation {return T_ROTAT;}
+
+Homothetie {return T_HOMOT;}
+homothetie {return T_HOMOT;}
+
 <INITIAL>print[[:space:]]*\" {c = malloc(10000*sizeof(char)); BEGIN PRINT;}
 
 <INITIAL>"/*"     {BEGIN COM;}
