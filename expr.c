@@ -81,6 +81,14 @@ struct expr *mk_cell(struct expr *car, struct expr *cdr){
   return res;
 }
 
+struct expr *mk_path(struct expr *car, struct expr *cdr){
+   struct expr *res = mk_node();
+   res->type = PATH;
+   res->expr->cell.car=car;
+   res->expr->cell.cdr=cdr;
+   return res;
+}
+
 struct expr *mk_head(struct expr *list){
   struct expr *res = mk_node();
   if (list->expr->cell.car == NULL){

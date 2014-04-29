@@ -1,7 +1,7 @@
 
 enum expr_kind {ID, FUN, APP, NUM, OP, COND, CELL, NIL, POINT, PATH, CIRCLE, BEZIER};
 
-enum op{PLUS, MINUS, MULT, DIV, MOD, LEQ, LE, GEQ, GE, EQ, OR, AND, NOT, CONS, HEAD, TAIL, APPEND, HEADN, SETABS, SETORD, SETRAYON, SETCENTRE, SETPOINT1, SETPOINT2, SETPOINT3, SETPOINT4};
+enum op{PLUS, MINUS, MULT, DIV, MOD, LEQ, LE, GEQ, GE, EQ, OR, AND, NOT, CONS, HEAD, TAIL, APPEND, HEADN, SETABS, SETORD, SETRAYON, SETCENTRE, SETPOINT1, SETPOINT2, SETPOINT3, SETPOINT4, ADDPATH};
 
 struct expr;
 
@@ -14,11 +14,6 @@ struct point{
    int abs;
    int ord;
 };
-
-// TODO
-/*struct path{
-
-};*/
 
 struct circle{
    struct expr *centre;
@@ -86,3 +81,4 @@ struct expr *mk_reverse(struct expr *list, struct expr *list2);
 struct expr *mk_point();
 struct expr *mk_circle();
 struct expr *mk_bezier();
+struct expr *mk_path(struct expr *elem1,struct expr *elem2);

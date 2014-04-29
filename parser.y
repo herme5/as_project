@@ -56,6 +56,7 @@ struct env * get_env(){
 %type<t_exp> p
 %type<t_exp> l
 %type<t_exp> list
+%type<t_exp> path
 
 %left T_WHERE
 %right T_IN
@@ -129,6 +130,9 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 //courbe de bezier
 | T_BEZIER'('e','e','e','e')' {$$ = mk_bezier(); $$ = mk_app(mk_app(mk_op(SETPOINT1),$$),$3); $$ = mk_app(mk_app(mk_op(SETPOINT2),$$),$5); $$ = mk_app(mk_app(mk_op(SETPOINT3),$$),$7); $$ = mk_app(mk_app(mk_op(SETPOINT4),$$),$9);}
 
+//PATH
+| '(' path ')' {$$ = $2;}
+
 | e T_AND e   {$$ = mk_app(mk_app(mk_op(AND),$1),$3);}
 | e T_OR e    {$$ = mk_app(mk_app(mk_op(OR),$1),$3);}
 | T_NOT e     {$$ = mk_app(mk_op(NOT),$2);}
@@ -180,6 +184,11 @@ l : e ']'   {$$ = mk_app(mk_app(mk_op(CONS),$1),mk_cell(NULL, NULL));}
 | e',' l    {$$ = mk_app(mk_app(mk_op(CONS),$1),$3);}
 |']'        {$$ = mk_cell(NULL, NULL);}
 ;
+
+path : '-' e {$$ = mk_app(mk_op(ADDPATH),$2);}
+|e '-' path {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$3);}
+|e '-''-' path {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$4);}
+
 
 %%
 

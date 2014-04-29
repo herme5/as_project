@@ -76,11 +76,23 @@ void print_list(struct expr *list){
       print_expr(tmp->expr->cell.car);
       tmp = (tmp->expr->cell.cdr);
       if (tmp->expr->cell.car != NULL){
-	printf(", ");
+         printf(", ");
       }
     }
   }
   printf("}");
+}
+
+void print_path(struct expr *path){
+  struct expr *tmp = path;
+  if (tmp != NULL){
+    while(tmp->expr->cell.cdr != NULL){
+      print_expr(tmp->expr->cell.car);
+      tmp = (tmp->expr->cell.cdr);
+      printf("--");
+    }
+    print_expr(tmp->expr->cell.car);
+  }
 }
 
 void print_expr(struct expr *expr){
@@ -96,6 +108,7 @@ void print_expr(struct expr *expr){
   case POINT : print_point(expr);return;
   case CIRCLE : print_circle(expr);return;
   case BEZIER : print_bezier(expr);return;
+  case PATH : print_path(expr);return;
   default : printf("non reconnu");
   }
 }
@@ -291,6 +304,8 @@ void step(struct configuration *conf){
     return;
   case NIL:
     return;
+  case PATH:
+    return;
   case OP:
     {
       //printf("1\n");
@@ -317,11 +332,17 @@ void step(struct configuration *conf){
       }
       if(conf->closure->expr->type==POINT){
          c1 = conf->closure->expr;
+         if (expr->expr->op == ADDPATH && stack==NULL){
+            conf->closure = mk_closure(mk_path(c1,NULL),NULL);return;
+         }
       }
       if(conf->closure->expr->type==CIRCLE){
          c1 = conf->closure->expr;
       }
       if(conf->closure->expr->type==BEZIER){
+         c1 = conf->closure->expr;
+      }
+      if(conf->closure->expr->type==PATH){
          c1 = conf->closure->expr;
       }
       if(conf->closure->expr->type==CELL){
@@ -389,12 +410,19 @@ void step(struct configuration *conf){
 	//print_list(conf->closure->expr);
 
 	switch (expr->expr->op){
-	case CONS:  conf->closure = mk_closure(mk_cell(e1,conf->closure->expr),NULL); return;
+	case CONS:  conf->closure = mk_closure(mk_cell(e1,c2),NULL); return;
 	case APPEND: conf->closure = mk_closure(mk_append(c1,c2),NULL); return;
 	case HEADN: conf->closure = mk_closure(mk_headn(c2, e1),NULL); return;
        case EQ: conf->closure = mk_closure(mk_int(list_equal(c1,c2)),NULL); return;
 	default:    assert(0);
 	}
+      }
+      if (conf->closure->expr->type==PATH){
+         c2 = conf->closure->expr;
+         switch (expr->expr->op){
+            case ADDPATH: conf->closure = mk_closure(mk_path(c1,c2),NULL);return;
+            default: assert(0);
+         }
       }
       //printf("10\n");
     }
