@@ -6,7 +6,7 @@
 #include <math.h>
 #include "machine.h"
 
-#define MAX_CLOSURE 10000000000000000
+#define MAX_CLOSURE 1000000
 
 int nb_closure;
 
@@ -115,6 +115,60 @@ void print_expr(struct expr *expr){
   case PATH  : print_path(expr); return;
   default : printf("non reconnu");
   }
+}
+
+/*function drawDot(x, y){
+  context.beginPath();
+  context.fillStyle='black';
+  context.arc(x, y, 4, 0, 2 * Math.PI, true);
+  context.fill();
+  }
+function drawCurve()
+{
+  context.beginPath();
+  context.strokeStyle='red';
+  context.lineWidth=4;
+  context.moveTo(20,100);
+  context.quadraticCurveTo(200,10, 300, 100);
+  context.stroke();
+}
+*/
+
+char *draw_expr(struct expr *form){
+  char *buffer = malloc(10000 * sizeof(char));
+  switch(form->type){
+
+  case POINT :
+    sprintf(buffer,
+	    "context.beginPath();\ncontext.fillStyle='black';\ncontext.arc(%d,%d,4,0,2*Math.PI,true);\ncontext.fill();\n\n",
+	    form->expr->point.abs,
+	    form->expr->point.ord);
+    break;
+  case BEZIER :
+    sprintf(buffer,
+	    "context.beginPath();\ncontext.moveTo(%d,%d);\ncontext.bezierCurveTo(%d,%d,%d,%d,%d,%d);\ncontext.strokeStyle='black';\ncontext.stroke();\n\n",
+	    form->expr->bezier.point1->expr->point.abs,
+	    form->expr->bezier.point1->expr->point.ord,
+	    form->expr->bezier.point2->expr->point.abs,
+	    form->expr->bezier.point2->expr->point.ord,
+	    form->expr->bezier.point3->expr->point.abs,
+	    form->expr->bezier.point3->expr->point.ord,
+	    form->expr->bezier.point4->expr->point.abs,
+	    form->expr->bezier.point4->expr->point.ord);
+    break;
+  case CIRCLE :
+    sprintf(buffer,
+	    "context.beginPath();\ncontext.arc(%d,%d,%d,0,Math.PI*2);\n",
+	    form->expr->circle.centre->expr->point.abs,
+	    form->expr->circle.centre->expr->point.ord,
+	    form->expr->circle.rayon);
+    break;
+  case PATH :
+    while(0){}
+    break;
+  default : break;}
+  
+  return buffer;
 }
 
 void print_bezier(struct expr *bezier){
@@ -514,7 +568,7 @@ void step(struct configuration *conf){
 	case MINUS: conf->closure = mk_closure(mk_int(k1 - k2 ),NULL);return;
 	case MULT:  conf->closure = mk_closure(mk_int(k1 * k2 ),NULL);return;
 	case DIV:   assert(k2!=0);
-	            conf->closure = mk_closure(mk_int(k1 /  k2),NULL);return;
+	  conf->closure = mk_closure(mk_int(k1 /  k2),NULL);return;
 	case MOD:   conf->closure = mk_closure(mk_int(k1 %  k2),NULL);return;
 	case LEQ:   conf->closure = mk_closure(mk_int(k1 <= k2),NULL);return;
 	case LE:    conf->closure = mk_closure(mk_int(k1 <  k2),NULL);return;
@@ -552,11 +606,11 @@ void step(struct configuration *conf){
       }
       
       if (conf->closure->expr->type == PATH){
-         c2 = conf->closure->expr;
-         switch (expr->expr->op){
-	 case ADDPATH: conf->closure = mk_closure(mk_path(c1,c2),NULL);return;
-	 default: assert(0);
-         }
+	c2 = conf->closure->expr;
+	switch (expr->expr->op){
+	case ADDPATH: conf->closure = mk_closure(mk_path(c1,c2),NULL);return;
+	default: assert(0);
+	}
       }
       
       if(stack == NULL){return;}
@@ -575,9 +629,7 @@ void step(struct configuration *conf){
 	default : assert(0);
 	}			
       }
-      
-    }
-    ;
+    };
   default: assert(0);
   }
 }

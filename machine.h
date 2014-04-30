@@ -42,6 +42,8 @@ void print_point (struct expr *point);
 void print_circle(struct expr *circle);
 void print_bezier(struct expr *bezier);
 void print_path  (struct expr *path);
+char*draw_expr   (struct expr *form);
+
 
 int element_equal(struct expr *e1, struct expr *e2);
 float to_radian(int angle);

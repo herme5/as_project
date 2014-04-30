@@ -1,18 +1,23 @@
 %{
-
+  /*
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <string.h>
+  */
 #include "machine.h"
+#include "js_writer.h"
 
-struct env * environment = NULL;
+#define MAX_CAR 100000
+
+struct env *environment = NULL;
 struct configuration conf_concrete;
-struct configuration * conf = &conf_concrete;
+struct configuration*conf = &conf_concrete;
 
-struct env * get_env(){
-    return environment;
+struct env *get_env(){
+  return environment;
 }
 
 %}
@@ -73,11 +78,11 @@ struct env * get_env(){
 %right T_CONS
 %right T_LET T_ID T_NUM
 %right EOE
-%nonassoc NEG
 %left '%'
 %left '+' '-'
 %left '*' '/'
 %nonassoc T_HEAD T_TAIL
+%nonassoc NEG
 %nonassoc '(' ')'
 
 %union{
@@ -89,14 +94,13 @@ struct env * get_env(){
 
 %%
 
-
 s :
 
 | s EOE {;}
 
 | s e EOE {
   conf->closure = mk_closure($2,environment);
-  conf->stack=NULL;
+  conf->stack = NULL;
   step(conf);
   printf(">>> "); print_expr(conf->closure->expr); printf("\n");}
 
@@ -104,16 +108,15 @@ s :
 
 | s T_LET T_REC T_ID[var] '=' e[expr] EOE {
   environment = push_rec_env($var,$expr,environment);
-  conf->closure = mk_closure($expr,environment);
-  conf->stack=NULL; //step(conf);
-  /*printf(">>> "); print_expr(conf->closure->expr); printf("\n");*/}
+  struct closure * cl = mk_closure($expr,environment);
+  conf->closure = cl;
+  conf->stack = NULL;}
 
 | s T_LET T_ID[var] '=' e[expr] EOE {
   struct closure * cl = mk_closure($expr,environment);
   conf->closure = cl;
-  conf->stack=NULL; //step(conf);
-  environment = push_env($var,cl,environment);
-  /*printf(">>> "); print_expr(conf->closure->expr); printf("\n");*/}
+  conf->stack = NULL;
+  environment = push_env($var,cl,environment);}
 ;
 
 
@@ -123,29 +126,14 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | e '*' e     {$$ = mk_app(mk_app(mk_op(MULT),$1),$3);}
 | e '%' e     {$$ = mk_app(mk_app(mk_op(MOD),$1),$3);}
 
-| '(' '-' e ')' {$$ = mk_app(mk_app(mk_op(MINUS),mk_int(0)),$3);}
-| '(' e ')'     {$$ = $2;}
+| '(''-'e ')' {$$ = mk_app(mk_app(mk_op(MINUS),mk_int(0)),$3);}
+| '(' e ')'   {$$ = $2;}
 
-//POINT
-| '{' e ',' e '}' {$$ = mk_point(); $$ = mk_app(mk_app(mk_op(SETABS),$$),$2); $$ = mk_app(mk_app(mk_op(SETORD),$$),$4);}
-
-//CERCLE
-| T_CIRCLE'('e','e')' {$$ = mk_circle(); $$ = mk_app(mk_app(mk_op(SETCENTRE),$$),$3); $$ = mk_app(mk_app(mk_op(SETRAYON),$$),$5);}
-
-//COURBE DE BEZIER
-| T_BEZIER'('e','e','e','e')' {$$ = mk_bezier(); $$ = mk_app(mk_app(mk_op(SETPOINT1),$$),$3); $$ = mk_app(mk_app(mk_op(SETPOINT2),$$),$5); $$ = mk_app(mk_app(mk_op(SETPOINT3),$$),$7); $$ = mk_app(mk_app(mk_op(SETPOINT4),$$),$9);}
-
-//PATH
-| '(' path ')' {$$ = $2;}
-
-//TRANSLATION
-| T_TRANSLAT '(' e ',' e ')' {$$ = mk_app(mk_app(mk_op(TRANSLATION),$3),$5);}
-
-//ROTATION
-| T_ROTAT '(' e ',' e ',' e ')' {$$ = mk_app(mk_app(mk_app(mk_op(ROTATION),$3),$5),$7);}
-
-//HOMOTHETIE
-| T_HOMOT '(' e ',' e ',' e ')' {$$ = mk_app(mk_app(mk_app(mk_op(HOMOTHETIE),$3),$5),$7);}
+| T_DRAW '(' e ')' {$$ = $3;
+  conf->closure = mk_closure($3,environment);
+  conf->stack=NULL; step(conf);
+  /*printf(">>> "); print_expr(conf->closure->expr); printf("\n")*/;
+  js_write(draw_expr(conf->closure->expr));}
 
 | e T_AND e   {$$ = mk_app(mk_app(mk_op(AND),$1),$3);}
 | e T_OR e    {$$ = mk_app(mk_app(mk_op(OR),$1),$3);}
@@ -157,7 +145,6 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | e T_GEQ e   {$$ = mk_app(mk_app(mk_op(GEQ),$1),$3);}
 | e T_EQ e    {$$ = mk_app(mk_app(mk_op(EQ),$1),$3);}
 | T_NUM       {$$ = mk_int($1);}
-//| T_DRAW e    {;}
 
 | T_IF e T_THEN e T_ELSE e {$$ = mk_cond($2,$4,$6);}
 | T_ID                     {$$=mk_id($1);}
@@ -167,21 +154,41 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 /*FONCTION AVEC PLUSIEURS PARAMETRES*/
 | T_FUN T_ID p {$$ = mk_fun ($2,$3);}
 
-| '(' e e ')'              {$$ = mk_app($2,$3);}
-| f e ')'                  {$$ = mk_app($1,$2);}
+| '(' e e ')'  {$$ = mk_app($2,$3);}
+| f e ')'      {$$ = mk_app($1,$2);}
 
-/* LET IN */
 | T_LET T_ID[var] '=' e[expr1] T_IN e[expr2] {$$ = mk_app(mk_fun($var,$expr2),$expr1);}
+| e[expr2] T_WHERE T_ID[var] '=' e[expr1]    {$$ = mk_app(mk_fun($var,$expr2),$expr1);}
 
-/* WHERE */
-| e[expr2] T_WHERE T_ID[var] '=' e[expr1] {$$ = mk_app(mk_fun($var,$expr2),$expr1);}
-
-| e[expr] T_CONS e[list] {$$ = mk_app(mk_app(mk_op(CONS),$expr), $list);}
-| list {$$=$1;}
+| list     {$$ = $1;}
 | T_HEAD e {$$ = mk_app(mk_op(HEAD),($2));}
 | T_TAIL e {$$ = mk_app(mk_op(TAIL),($2));}
-;
+| e[expr] T_CONS e[list] {$$ = mk_app(mk_app(mk_op(CONS),$expr), $list);}
 
+| '{' e ',' e '}' {
+  $$ = mk_point();
+  $$ = mk_app(mk_app(mk_op(SETABS),$$),$2);
+  $$ = mk_app(mk_app(mk_op(SETORD),$$),$4);}
+
+| T_CIRCLE'('e','e')' {
+  $$ = mk_circle();
+  $$ = mk_app(mk_app(mk_op(SETCENTRE),$$),$3);
+  $$ = mk_app(mk_app(mk_op(SETRAYON),$$),$5);}
+
+| T_BEZIER'('e','e','e','e')' {
+  $$ = mk_bezier();
+  $$ = mk_app(mk_app(mk_op(SETPOINT1),$$),$3);
+  $$ = mk_app(mk_app(mk_op(SETPOINT2),$$),$5);
+  $$ = mk_app(mk_app(mk_op(SETPOINT3),$$),$7);
+  $$ = mk_app(mk_app(mk_op(SETPOINT4),$$),$9);}
+
+| '(' path ')' {$$ = $2;}
+
+| T_TRANSLAT '(' e ',' e ')'    {$$ = mk_app(mk_app(mk_op(TRANSLATION),$3),$5);}
+| T_ROTAT '(' e ',' e ',' e ')' {$$ = mk_app(mk_app(mk_app(mk_op(ROTATION),$3),$5),$7);}
+| T_HOMOT '(' e ',' e ',' e ')' {$$ = mk_app(mk_app(mk_app(mk_op(HOMOTHETIE),$3),$5),$7);}
+
+;
 
 p : T_ID T_ARROW e {$$ = mk_fun ($1,$3);}
 | T_ID p           {$$ = mk_fun ($1, $2);}
@@ -191,7 +198,6 @@ f : '(' e e {$$ = mk_app($2, $3);}
 | f e       {$$ = mk_app($1,$2);}
 ;
 
-
 list: '[' l {$$ = $2;}
 ;
 
@@ -200,8 +206,8 @@ l : e ']'   {$$ = mk_app(mk_app(mk_op(CONS),$1),mk_cell(NULL, NULL));}
 |']'        {$$ = mk_cell(NULL, NULL);}
 ;
 
-path : '-' e {$$ = mk_app(mk_op(ADDPATH),$2);}
-|e '-' path {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$3);}
+path : '-' e   {$$ = mk_app(mk_op(ADDPATH),$2);}
+|e '-' path    {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$3);}
 |e '-''-' path {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$4);}
 
 
