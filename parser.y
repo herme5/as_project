@@ -67,6 +67,7 @@ struct env *get_env(){
 %type<t_exp> l
 %type<t_exp> list
 %type<t_exp> path
+%type<t_exp> path1
 
 %left T_WHERE
 %right T_IN
@@ -84,6 +85,7 @@ struct env *get_env(){
 %nonassoc T_HEAD T_TAIL
 %nonassoc NEG
 %nonassoc '(' ')'
+%nonassoc X_PATH
 
 %union{
   char *id;
@@ -207,10 +209,16 @@ l : e ']'   {$$ = mk_app(mk_app(mk_op(CONS),$1),mk_cell(NULL, NULL));}
 |']'        {$$ = mk_cell(NULL, NULL);}
 ;
 
-path : '-' e   {$$ = mk_app(mk_op(ADDPATH),$2);}
-|e '-' path    {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$3);}
-|e '-''-' path {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$4);}
+/* path : '-' e   {$$ = mk_app(mk_op(ADDPATH),$2);} */
+/* |e '-' path    {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$3);} */
+/* |e '-''-' path {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$4);} */
 
+path : e '-''-' path1 {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$4);}
+;
+
+path1 : path          {$$ = mk_app(mk_op(ADDPATH),$1);}
+| e                   {$$ = mk_app(mk_op(ADDPATH),$1);}
+;
 
 %%
 

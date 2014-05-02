@@ -28,8 +28,9 @@ int js_write_init(FILE *f){
 int js_write(char *buffer){
   file = fopen(JS_FILE, "r+");
 
-  if( file == NULL)
-    file = fopen(JS_FILE, "w");
+  if( file == NULL || init == 0)
+    file = fopen(JS_FILE, "w+");
+
   fseek(file, 0, SEEK_END);
 
   if (ftell(file) == 0 || init == 0 )
