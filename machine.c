@@ -117,36 +117,22 @@ void print_expr(struct expr *expr){
   }
 }
 
-/*function drawDot(x, y){
-  context.beginPath();
-  context.fillStyle='black';
-  context.arc(x, y, 4, 0, 2 * Math.PI, true);
-  context.fill();
-  }
-function drawCurve()
-{
-  context.beginPath();
-  context.strokeStyle='red';
-  context.lineWidth=4;
-  context.moveTo(20,100);
-  context.quadraticCurveTo(200,10, 300, 100);
-  context.stroke();
-}
-*/
-
 char *draw_expr(struct expr *form){
-  char *buffer = malloc(10000 * sizeof(char));
-  switch(form->type){
 
+  char *buffer = malloc(10000 * sizeof(char));
+  struct expr *tmp;
+  
+  switch(form->type){
+    
   case POINT :
     sprintf(buffer,
-	    "\ncontext.beginPath();\ncontext.fillStyle='black';\ncontext.arc(%d,%d,4,0,2*Math.PI,true);\ncontext.fill();\n\n",
+	    "context.beginPath();\ncontext.fillStyle='black';\ncontext.arc(%d,%d,4,0,2*Math.PI,true);\ncontext.fill();\n\n",
 	    form->expr->point.abs,
 	    form->expr->point.ord);
     break;
   case BEZIER :
     sprintf(buffer,
-	    "\ncontext.beginPath();\ncontext.moveTo(%d,%d);\ncontext.bezierCurveTo(%d,%d,%d,%d,%d,%d);\ncontext.strokeStyle='black';\ncontext.stroke();\n\n",
+	    "context.beginPath();\ncontext.moveTo(%d,%d);\ncontext.bezierCurveTo(%d,%d,%d,%d,%d,%d);\ncontext.strokeStyle='black';\ncontext.stroke();\n\n",
 	    form->expr->bezier.point1->expr->point.abs,
 	    form->expr->bezier.point1->expr->point.ord,
 	    form->expr->bezier.point2->expr->point.abs,
@@ -158,13 +144,31 @@ char *draw_expr(struct expr *form){
     break;
   case CIRCLE :
     sprintf(buffer,
-	    "\ncontext.beginPath();\ncontext.arc(%d,%d,%d,0,Math.PI*2);\ncontext.stroke();\n\n",
+	    "context.beginPath();\ncontext.arc(%d,%d,%d,0,Math.PI*2);\ncontext.stroke();\n\n",
 	    form->expr->circle.centre->expr->point.abs,
 	    form->expr->circle.centre->expr->point.ord,
 	    form->expr->circle.rayon);
     break;
   case PATH :
-    while(0){}
+    tmp = form;
+
+    if (tmp == NULL)
+      break ;
+
+    sprintf(buffer, "context.beginPath();\ncontext.moveTo(%d,%d);\n",
+	    tmp->expr->cell.car->expr->point.abs,
+	    tmp->expr->cell.car->expr->point.ord);
+
+    while(tmp->expr->cell.cdr != NULL){
+      struct expr *nxt = tmp->expr->cell.cdr->expr->cell.car;
+      sprintf(buffer,
+	      "%scontext.lineTo(%d,%d);\n",
+	      buffer,
+	      nxt->expr->point.abs,
+	      nxt->expr->point.ord);
+      tmp = (tmp->expr->cell.cdr);
+    }
+    sprintf(buffer, "%s\ncontext.stroke();\ncontext.closePath();\n\n", buffer);
     break;
   default : break;}
   
@@ -328,10 +332,14 @@ struct expr* translation(struct expr* elem, struct expr* vecteur){
     elem = set_ord(elem, tmp_y+y);
     break;
 
-  case PATH: do {
+  case PATH: 
+
+    while(tmp->expr->cell.cdr != NULL){
       tmp->expr->cell.car = translation(tmp->expr->cell.car, vecteur);
       tmp = tmp->expr->cell.cdr;
-    } while(tmp->expr->cell.cdr != NULL);
+    }
+    tmp->expr->cell.car = translation(tmp->expr->cell.car, vecteur);
+    
     break;
 
   case CIRCLE:
@@ -372,10 +380,11 @@ struct expr* rotation(struct expr* elem, struct expr* centre, struct expr* angle
     break;
 
   case PATH:
-    do {
+    while(tmp->expr->cell.cdr != NULL){
       tmp->expr->cell.car = rotation(tmp->expr->cell.car, centre, angle);
       tmp = tmp->expr->cell.cdr;
-    } while(tmp->expr->cell.cdr != NULL);
+    }
+    tmp->expr->cell.car = rotation(tmp->expr->cell.car, centre, angle);
     break;
 
   case CIRCLE:
@@ -415,11 +424,12 @@ struct expr *homothetie(struct expr *elem, struct expr *centre, struct expr *rat
     elem = set_ord(elem, (int)ord);
     break;
 
-  case PATH: 
-    do {
+  case PATH:
+    while(tmp->expr->cell.cdr != NULL){
       tmp->expr->cell.car = rotation(tmp->expr->cell.car, centre, ratio);
       tmp = tmp->expr->cell.cdr;
-    } while(tmp->expr->cell.cdr != NULL);
+    }
+    tmp->expr->cell.car = rotation(tmp->expr->cell.car, centre, ratio);
     break;
 
   case CIRCLE:
