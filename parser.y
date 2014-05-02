@@ -104,7 +104,7 @@ s :
   step(conf);
   printf(">>> "); print_expr(conf->closure->expr); printf("\n");}
 
-| s T_PRINT EOE {printf("> ");printf($2);printf("\n");}
+| s T_PRINT EOE {printf("> ");printf("%s", $2);printf("\n");}
 
 | s T_LET T_REC T_ID[var] '=' e[expr] EOE {
   environment = push_rec_env($var,$expr,environment);
@@ -133,6 +133,7 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
   conf->closure = mk_closure($3,environment);
   conf->stack=NULL; step(conf);
   /*printf(">>> "); print_expr(conf->closure->expr); printf("\n")*/;
+  html_write();
   js_write(draw_expr(conf->closure->expr));}
 
 | e T_AND e   {$$ = mk_app(mk_app(mk_op(AND),$1),$3);}

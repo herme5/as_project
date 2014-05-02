@@ -140,13 +140,13 @@ char *draw_expr(struct expr *form){
 
   case POINT :
     sprintf(buffer,
-	    "context.beginPath();\ncontext.fillStyle='black';\ncontext.arc(%d,%d,4,0,2*Math.PI,true);\ncontext.fill();\n\n",
+	    "\ncontext.beginPath();\ncontext.fillStyle='black';\ncontext.arc(%d,%d,4,0,2*Math.PI,true);\ncontext.fill();\n\n",
 	    form->expr->point.abs,
 	    form->expr->point.ord);
     break;
   case BEZIER :
     sprintf(buffer,
-	    "context.beginPath();\ncontext.moveTo(%d,%d);\ncontext.bezierCurveTo(%d,%d,%d,%d,%d,%d);\ncontext.strokeStyle='black';\ncontext.stroke();\n\n",
+	    "\ncontext.beginPath();\ncontext.moveTo(%d,%d);\ncontext.bezierCurveTo(%d,%d,%d,%d,%d,%d);\ncontext.strokeStyle='black';\ncontext.stroke();\n\n",
 	    form->expr->bezier.point1->expr->point.abs,
 	    form->expr->bezier.point1->expr->point.ord,
 	    form->expr->bezier.point2->expr->point.abs,
@@ -158,7 +158,7 @@ char *draw_expr(struct expr *form){
     break;
   case CIRCLE :
     sprintf(buffer,
-	    "context.beginPath();\ncontext.arc(%d,%d,%d,0,Math.PI*2);\n",
+	    "\ncontext.beginPath();\ncontext.arc(%d,%d,%d,0,Math.PI*2);\ncontext.stroke();\n\n",
 	    form->expr->circle.centre->expr->point.abs,
 	    form->expr->circle.centre->expr->point.ord,
 	    form->expr->circle.rayon);

@@ -1,7 +1,22 @@
-let p = {500,300};
-p;
-let centre = {300,300};
-centre;
-let angle = (2);
-angle;
-homothetie(p,centre,angle);
+let rayon = 100;
+let rayon2 = 30;
+let c1 = cercle({200,200}, rayon);
+let c2 = cercle({200,400}, rayon);
+let c3 = cercle({200,200}, rayon2);
+let c4 = cercle({200,400}, rayon2);
+
+draw(c1);
+draw(rotation(c2, {200, 200}, (-90)));
+draw(rotation(c4, {200, 200}, (-90)));
+draw(c3);
+
+let p1 = {300,200};
+let p2 = {500,200};
+let p3 = {500,400};
+let p4 = {300,400};
+let b = bezier(p1,p2,p3,p4);
+draw(translation(rotation(b, {200, 200}, (90)), {200, 50} ));
+
+draw(bezier({100,500}, {100,700}, {500,700},{500,500}));
+
+let p = (p1--p2--p3--p4);
