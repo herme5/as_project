@@ -194,10 +194,10 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 ;
 
 p : T_ID T_ARROW e {$$ = mk_fun ($1,$3);}
-| T_ID p           {$$ = mk_fun ($1, $2);}
+| T_ID p           {$$ = mk_fun ($1,$2);}
 ;
 
-f : '(' e e {$$ = mk_app($2, $3);}
+f : '(' e e {$$ = mk_app($2,$3);}
 | f e       {$$ = mk_app($1,$2);}
 ;
 
@@ -208,10 +208,6 @@ l : e ']'   {$$ = mk_app(mk_app(mk_op(CONS),$1),mk_cell(NULL, NULL));}
 | e',' l    {$$ = mk_app(mk_app(mk_op(CONS),$1),$3);}
 |']'        {$$ = mk_cell(NULL, NULL);}
 ;
-
-/* path : '-' e   {$$ = mk_app(mk_op(ADDPATH),$2);} */
-/* |e '-' path    {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$3);} */
-/* |e '-''-' path {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$4);} */
 
 path : e '-''-' path1 {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$4);}
 ;

@@ -6,7 +6,7 @@
 #include <math.h>
 #include "machine.h"
 
-#define MAX_CLOSURE 1000000
+#define MAX_CLOSURE 1000000000
 
 int nb_closure;
 
@@ -239,19 +239,19 @@ void print_op(struct expr *op){
   case CONS : printf("cons"); return;
   case HEAD : printf("head"); return;
   case TAIL : printf("tail"); return;
-  case APPEND:
-  case SETABS:
-  case SETORD:
-  case SETRAYON:
-  case SETCENTRE:
-  case SETPOINT1:
-  case SETPOINT2:
-  case SETPOINT3:
-  case SETPOINT4:
-  case ADDPATH:
-  case TRANSLATION:
-  case ROTATION:
-  case HOMOTHETIE:
+  case APPEND: return;
+  case SETABS: return;
+  case SETORD: return;
+  case SETRAYON: return;
+  case SETCENTRE: return;
+  case SETPOINT1: return;
+  case SETPOINT2: return;
+  case SETPOINT3: return;
+  case SETPOINT4: return;
+  case ADDPATH: return;
+  case TRANSLATION: return;
+  case ROTATION: return;
+  case HOMOTHETIE: return;
   default : assert(0);
   }
 }
