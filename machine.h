@@ -42,7 +42,13 @@ void print_point (struct expr *point);
 void print_circle(struct expr *circle);
 void print_bezier(struct expr *bezier);
 void print_path  (struct expr *path);
-char*draw_expr   (struct expr *form);
+void print_musique_liste(struct expr *liste);
+void print_musique(struct expr *musique);
+void print_note(struct expr *note);
+char *draw_expr(struct expr *form);
+char *lily_list(struct expr *list);
+char *lily(struct expr *musique);
+char *get_note(struct expr* note, char *tonique, int dureenum, int dureeden, int previous_note, int previous_octave);
 
 
 int element_equal(struct expr *e1, struct expr *e2);
@@ -53,6 +59,7 @@ struct expr *set_ord   (struct expr *point, int ord);
 struct expr *set_rayon (struct expr *cercle, int rayon);
 struct expr *set_centre(struct expr *cercle, struct expr *point);
 struct expr *set_point (struct expr *bezier, struct expr *point, int pos);
+struct expr *set_list (struct expr *musique, struct expr *list);
 
 struct expr *translation(struct expr *elem, struct expr *vecteur);
 struct expr *rotation   (struct expr *elem, struct expr *centre, struct expr *angle);

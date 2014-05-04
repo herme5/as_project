@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <math.h>
 #include "machine.h"
+#include "musique.h"
 
 #define MAX_CLOSURE 1000000000
 
@@ -85,6 +86,44 @@ void print_list(struct expr *list){
   printf("}");
 }
 
+void print_musique_liste(struct expr *list){
+  printf("(");
+  struct expr *tmp = list;
+
+  if (tmp == NULL)
+    return ;
+  
+  while(tmp->expr->cell.cdr != NULL){
+    print_expr(tmp->expr->cell.car);
+    tmp = (tmp->expr->cell.cdr);
+    if (tmp->expr->cell.car != NULL)
+      printf(" ");
+  }
+  printf(")");
+}
+
+void print_musique(struct expr *musique){
+  printf("{");
+  print_musique_liste(musique->expr->musique.liste);
+  printf(", ");
+  printf("%s",musique->expr->musique.tonique);
+  printf(", ");
+  printf("%d", musique->expr->musique.dureenum);
+  if (musique->expr->musique.dureeden != 1){
+    printf("/%d", musique->expr->musique.dureeden);
+  }
+  printf("}");
+}
+
+void print_note(struct expr *note){
+  if (note->expr->note.valeur==0)
+    printf("S");
+  else
+    printf("%d", note->expr->note.valeur);
+  printf("%s",note->expr->note.info1);
+  printf("%s",note->expr->note.info2);
+}
+
 void print_path(struct expr *path){
   struct expr *tmp = path;
   if (tmp == NULL)
@@ -113,6 +152,8 @@ void print_expr(struct expr *expr){
   case CIRCLE: print_circle(expr); return;
   case BEZIER: print_bezier(expr); return;
   case PATH  : print_path(expr); return;
+  case MUSIQUE : print_musique(expr); return;
+  case NOTE : print_note(expr); return;
   default : printf("non reconnu");
   }
 }
@@ -172,6 +213,111 @@ char *draw_expr(struct expr *form){
     break;
   default : break;}
   
+  return buffer;
+}
+
+char *lily_list(struct expr *list){
+  assert(list->type == CELL);
+  char* c = malloc(10000*sizeof(char));
+  strcat (c, "\\score {\n{\\new Staff {\n\\set Staff.instrumentName = \"Basse\"\n\\set Staff.midiInstrument = \"electric bass (pick)\"");
+  struct expr *tmp = list;
+  int i = 0;
+  if (tmp == NULL)
+    return c;
+  while(tmp->expr->cell.cdr != NULL){
+    if (tmp->expr->cell.car != NULL){
+      strcat(c, lily(tmp->expr->cell.car));
+    }
+    tmp = (tmp->expr->cell.cdr);
+  }
+  strcat (c, "}}\n\\layout { }\n\\midi { \\tempo 4=110 }\n}");
+  return c;
+}
+
+char *lily(struct expr* musique){
+  assert(musique->type == MUSIQUE);
+  struct expr *liste = musique->expr->musique.liste;
+  char* tonique = musique->expr->musique.tonique;
+  int dureenum = musique->expr->musique.dureenum;
+  int dureeden = musique->expr->musique.dureeden;
+
+  char *c = malloc(10000 * sizeof(char));
+  strcat(c,"\\relative c");
+  char *octav;
+
+  int ia = get_octave(tonique);
+  switch (ia){
+    case 0: octav = ",,"; break;
+    case 1: octav = ","; break;
+    case 2: octav = "\0"; break;
+    case 3: octav = "\'"; break;
+    case 4: octav = "\'\'"; break;
+    case 5: octav = "\'\'\'"; break;
+    case 6: octav = "\'\'\'\'"; break;
+    case 7: octav = "\'\'\'\'\'"; break;
+    default : assert(0);
+  }
+
+
+  strcat(c, octav);
+  strcat(c, " {");
+
+  char *notes = malloc(1000*sizeof(char));
+  struct expr *tmp = liste;
+  int previous_note = 1;
+  int previous_octave = 0;
+
+  if (tmp != NULL){
+    while(tmp->expr->cell.cdr != NULL){
+      if (tmp->expr->cell.car != NULL){
+        strcat(notes, get_note(tmp->expr->cell.car, tonique, dureenum, dureeden, previous_note, previous_octave));
+        if (tmp->expr->cell.car->expr->note.valeur!= 0){
+
+          int n = tmp->expr->cell.car->expr->note.valeur;
+          previous_note = n;
+          while (n>7){
+            n = n-7;
+            previous_octave++;
+          }
+          while (n<-7){
+            n = n+7;
+            previous_octave--;
+          }
+          if (n>0){
+            if (n>4){
+              previous_octave++;
+            }
+          }
+          if (n<0){
+            if (n<-4){
+              previous_octave--;
+            }
+          }
+        }
+        tmp = (tmp->expr->cell.cdr);
+      }
+    }
+  }
+
+  strcat(c, notes);
+  strcat(c, " }\n");
+  return c;
+}
+
+char *get_note(struct expr* note, char *tonique, int dureenum, int dureeden, int previous_note, int previous_octave){
+  char *notechar = get_note2(note->expr->note.valeur, tonique, previous_note, previous_octave, note->expr->note.info1);
+  int temps = 4*dureeden/dureenum;
+  char *temp = note->expr->note.info2;
+  while (temp[0] != '\0'){
+    if (temp[0]=='.')
+      temps = temps/2;
+    if (temp[0]=='-')
+      temps = temps/3;
+    temp++;
+  } 
+
+  char *buffer = malloc(1000*sizeof(char));
+  sprintf(buffer," %s%d", notechar, temps);
   return buffer;
 }
 
@@ -252,6 +398,7 @@ void print_op(struct expr *op){
   case TRANSLATION: return;
   case ROTATION: return;
   case HOMOTHETIE: return;
+  case SETLIST: return;
   default : assert(0);
   }
 }
@@ -327,6 +474,11 @@ struct expr* set_point(struct expr* bezier,struct expr *point,int pos){
   case 4: bezier->expr->bezier.point4 = point; break;
   }
   return bezier;
+}
+
+struct expr* set_list(struct expr *musique, struct expr *list){
+  musique->expr->musique.liste = list;
+  return musique;
 }
 
 struct expr* translation(struct expr* elem, struct expr* vecteur){
@@ -527,6 +679,10 @@ void step(struct configuration *conf){
     return;
   case PATH:
     return;
+  case NOTE:
+    return;
+  case MUSIQUE:
+    return;
   case OP:
     {
       struct stack *stack = conf->stack;
@@ -562,6 +718,9 @@ void step(struct configuration *conf){
       }
       if(conf->closure->expr->type == PATH){
 	c1 = conf->closure->expr;
+      }
+      if(conf->closure->expr->type == MUSIQUE){
+  c1 = conf->closure->expr;
       }
       if(conf->closure->expr->type == CELL){
 	c1 = conf->closure->expr;
@@ -624,6 +783,7 @@ void step(struct configuration *conf){
 	case APPEND: conf->closure = mk_closure(mk_append(c1,c2),NULL);return;
 	case HEADN:  conf->closure = mk_closure(mk_headn(c2,e1),NULL);return;
 	case EQ:     conf->closure = mk_closure(mk_int(list_equal(c1,c2)),NULL);return;
+  case SETLIST: conf->closure = mk_closure(set_list(c1,c2),NULL);return;
 	default:     assert(0);
 	}
       }

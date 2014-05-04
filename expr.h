@@ -1,7 +1,7 @@
 
-enum expr_kind {ID, FUN, APP, NUM, OP, COND, CELL, NIL, POINT, PATH, CIRCLE, BEZIER};
+enum expr_kind {ID, FUN, APP, NUM, OP, COND, CELL, NIL, POINT, PATH, CIRCLE, BEZIER, MUSIQUE, NOTE};
 
-enum op{PLUS, MINUS, MULT, DIV, MOD, LEQ, LE, GEQ, GE, EQ, OR, AND, NOT, CONS, HEAD, TAIL, APPEND, HEADN, SETABS, SETORD, SETRAYON, SETCENTRE, SETPOINT1, SETPOINT2, SETPOINT3, SETPOINT4, ADDPATH, TRANSLATION, ROTATION, HOMOTHETIE};
+enum op{PLUS, MINUS, MULT, DIV, MOD, LEQ, LE, GEQ, GE, EQ, OR, AND, NOT, CONS, HEAD, TAIL, APPEND, HEADN, SETABS, SETORD, SETRAYON, SETCENTRE, SETPOINT1, SETPOINT2, SETPOINT3, SETPOINT4, ADDPATH, TRANSLATION, ROTATION, HOMOTHETIE, SETLIST};
 
 struct expr;
 
@@ -27,7 +27,6 @@ struct bezier{
   struct expr *point4;
 };
 
-
 struct cell{
   struct expr *car;
   struct expr *cdr;
@@ -44,6 +43,19 @@ struct cond{
   struct expr *else_br;
 };
 
+struct musique{
+  struct expr *liste;
+  char* tonique;
+  int dureenum;
+  int dureeden;
+};
+
+struct note{
+  int valeur;
+  char* info1;
+  char* info2;
+};
+
 union node{
   char *id;
   struct fun fun;
@@ -55,6 +67,8 @@ union node{
   struct point point;
   struct circle circle;
   struct bezier bezier;
+  struct musique musique;
+  struct note note;
 };
 
 struct expr{
@@ -85,4 +99,6 @@ struct expr *mk_nil   ();
 struct expr *mk_point ();
 struct expr *mk_circle();
 struct expr *mk_bezier();
-struct expr *mk_path  (struct expr *elem1, struct expr *elem2);
+struct expr *mk_path(struct expr *elem1, struct expr *elem2);
+struct expr *mk_note(int note, char* info1, char* info2);
+struct expr *mk_musique(char* tonique, int dureenum, int dureeden);

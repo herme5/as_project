@@ -8,4 +8,5 @@
 
 
 int js_write(char *code);
+int lily_write(char *code);
 int html_write();

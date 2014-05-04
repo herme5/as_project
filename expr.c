@@ -89,6 +89,24 @@ struct expr *mk_path(struct expr *car, struct expr *cdr){
   return res;
 }
 
+struct expr *mk_note(int note, char* info1, char* info2){
+  struct expr *res = mk_node();
+  res->type = NOTE;
+  res->expr->note.valeur = note;
+  res->expr->note.info1 = info1;
+  res->expr->note.info2 = info2;
+  return res;
+}
+
+struct expr *mk_musique(char* tonique, int dureenum, int dureeden){
+  struct expr *res = mk_node();
+  res->type = MUSIQUE;
+  res->expr->musique.tonique = tonique;
+  res->expr->musique.dureenum = dureenum;
+  res->expr->musique.dureeden = dureeden;
+  return res;
+}
+
 struct expr *mk_head(struct expr *list){
   struct expr *res = mk_node();
   if (list->expr->cell.car == NULL)

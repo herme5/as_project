@@ -40,8 +40,8 @@ if if x==1 then 0 else 1 then x else (-x);
 if (succ x) > 2 && (square y) *5 > 200/7 then (square x) + 2 else (square x) -1;
 
 ((fun z -> (if (succ x) > 2 || if (square y) > 24 then (succ x) -1 <0 else (square x) > (succ x)
-       	  then fun x y -> x*x + 5*y -z
-    	  else fun x y -> x*y-y +z) 3 4) 7);
+          then fun x y -> x*x + 5*y -z
+          else fun x y -> x*y-y +z) 3 4) 7);
 
 let rec pgcd = fun x y ->
     ((fun mod ->
@@ -146,3 +146,13 @@ let rev = fun l -> (rev_rec l []);
 let premiers = fun n -> (rev (premiers_rev n));
 
 (nth (premiers 20) 6);
+
+/*========================
+ test sur le son
+==========================*/
+
+let m1 = {(2. 2 2. 2 4.. 4. 1 1 1. (-2)b. (-2)b (-2)b. (-2)b 4.. 4. 1 1 1.), La1M, 1/4};
+let m2 = {(2. 2 2. 2 4.. 4. 1 1 1. (-2)b. (-2)b (-2)b. (-2)b 4.. 4. 1 1 1.), La1M, 1/4};
+let m3 = {(2. 2 2. 2 4.. 4. 1 1 1. (-2)b. (-2)b (-2)b. (-2)b 4.. 4. 1 1 1.), La1M, 1/4};
+let m4 = {(2. 2 2. 2 4.. 4. 1 1 1. (-2)b. (-2)b (-2)b. (-2)b 4.. 4. 1 1 1.), La1M, 1/4};
+print([m1, m2, m3, m4]);

@@ -61,6 +61,13 @@ struct env *get_env(){
 %token T_ROTAT
 %token T_HOMOT
 
+%token T_MUSIQUEDEBUT
+%token T_MUSIQUEFIN
+%token T_NOTESFIN
+%token<info1> T_INFO1
+%token<info2> T_INFO2
+%token T_SPACE
+
 %type<t_exp> e
 %type<t_exp> f
 %type<t_exp> p
@@ -68,6 +75,11 @@ struct env *get_env(){
 %type<t_exp> list
 %type<t_exp> path
 %type<t_exp> path1
+%type<t_exp> note
+%type<t_exp> notel
+%type<t_exp> notelist
+%type<t_exp> musique
+%type<t_exp> fin
 
 %left T_WHERE
 %right T_IN
@@ -89,8 +101,11 @@ struct env *get_env(){
 
 %union{
   char *id;
+  char *info1;
+  char *info2;
   int num;
   char *print;
+  float duree;
   struct expr * t_exp;
 }
 
@@ -100,26 +115,27 @@ s :
 
 | s EOE {;}
 
-| s e EOE {
+| s fin EOE {
   conf->closure = mk_closure($2,environment);
   conf->stack = NULL;
   step(conf);
   printf(">>> "); print_expr(conf->closure->expr); printf("\n");}
 
-| s T_PRINT EOE {printf("> ");printf("%s", $2);printf("\n");}
-
-| s T_LET T_REC T_ID[var] '=' e[expr] EOE {
+| s T_LET T_REC T_ID[var] '=' fin[expr] EOE {
   environment = push_rec_env($var,$expr,environment);
   struct closure * cl = mk_closure($expr,environment);
   conf->closure = cl;
   conf->stack = NULL;}
 
-| s T_LET T_ID[var] '=' e[expr] EOE {
+| s T_LET T_ID[var] '=' fin[expr] EOE {
   struct closure * cl = mk_closure($expr,environment);
   conf->closure = cl;
   conf->stack = NULL;
   environment = push_env($var,cl,environment);}
 ;
+
+fin : e {$$ = $1;}
+| musique {$$ = $1;}
 
 
 e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
@@ -137,6 +153,11 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
   /*printf(">>> "); print_expr(conf->closure->expr); printf("\n")*/;
   html_write();
   js_write(draw_expr(conf->closure->expr));}
+
+| T_PRINT '(' e ')' {$$ = $3;
+  conf->closure = mk_closure($3,environment);
+  conf->stack=NULL; step(conf);
+  lily_write(lily_list(conf->closure->expr));}
 
 | e T_AND e   {$$ = mk_app(mk_app(mk_op(AND),$1),$3);}
 | e T_OR e    {$$ = mk_app(mk_app(mk_op(OR),$1),$3);}
@@ -205,7 +226,9 @@ list: '[' l {$$ = $2;}
 ;
 
 l : e ']'   {$$ = mk_app(mk_app(mk_op(CONS),$1),mk_cell(NULL, NULL));}
+| musique ']'   {$$ = mk_app(mk_app(mk_op(CONS),$1),mk_cell(NULL, NULL));}
 | e',' l    {$$ = mk_app(mk_app(mk_op(CONS),$1),$3);}
+| musique',' l    {$$ = mk_app(mk_app(mk_op(CONS),$1),$3);}
 |']'        {$$ = mk_cell(NULL, NULL);}
 ;
 
@@ -215,6 +238,26 @@ path : e '-''-' path1 {$$ = mk_app(mk_app(mk_op(ADDPATH),$1),$4);}
 path1 : path          {$$ = mk_app(mk_op(ADDPATH),$1);}
 | e                   {$$ = mk_app(mk_op(ADDPATH),$1);}
 ;
+
+note : T_NUM T_INFO1 T_INFO2 T_SPACE {$$ = mk_note($1, $2, $3);}
+| T_NUM T_INFO1 T_SPACE {$$ = mk_note($1, $2, "\0");}
+| T_NUM T_INFO2 T_SPACE {$$ = mk_note($1, "\0", $2);}
+| T_NUM T_SPACE {$$ = mk_note($1, "\0", "\0");}
+| T_NUM T_INFO1 T_INFO2 T_NOTESFIN {$$ = mk_note($1, $2, $3);}
+| T_NUM T_INFO1 T_NOTESFIN {$$ = mk_note($1, $2, "\0");}
+| T_NUM T_INFO2 T_NOTESFIN {$$ = mk_note($1, "\0", $2);}
+| T_NUM T_NOTESFIN {$$ = mk_note($1, "\0", "\0");}
+;
+
+notel : note ',' {$$ = mk_app(mk_app(mk_op(CONS),$1),mk_cell(NULL, NULL));}
+| note notel {$$ = mk_app(mk_app(mk_op(CONS),$1),$2);}
+;
+
+notelist : T_MUSIQUEDEBUT notel {$$ = $2;}
+;
+
+musique : notelist T_ID ',' T_NUM T_MUSIQUEFIN {$$ = mk_musique($2, $4, 1); $$= mk_app(mk_app(mk_op(SETLIST),$$),$1);}
+| notelist T_ID ',' T_NUM '/' T_NUM T_MUSIQUEFIN {$$ = mk_musique($2,$4,$6); $$= mk_app(mk_app(mk_op(SETLIST),$$),$1);}
 
 %%
 

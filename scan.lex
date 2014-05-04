@@ -7,8 +7,10 @@
 
 %option noyywrap
 
-%x PRINT
 %x COM
+%x NOTES
+%x NOTESNEG
+%x MUSIQUE
 %%
 
 let   {return T_LET;}
@@ -43,17 +45,32 @@ Homothetie {return T_HOMOT;}
 homothetie {return T_HOMOT;}
 
 draw {return T_DRAW;}
-
-<INITIAL>print[[:space:]]*\" {c = malloc(10000*sizeof(char)); BEGIN PRINT;}
+print {return T_PRINT;}
 
 <INITIAL>"/*"     {BEGIN COM;}
 <INITIAL>"//".*\n {;}
 
-<PRINT>\"   {yylval.print = c; BEGIN INITIAL; return T_PRINT;}
-<PRINT>.|\n {c = strcat(c, yytext);}
-
 <COM>.      {;}
 <COM>"*/"   {BEGIN INITIAL;}
+
+<INITIAL>"{(" {BEGIN NOTES; return T_MUSIQUEDEBUT;}
+
+<NOTES>[[:digit:]]+ {yylval.num = atoi(yytext); return T_NUM;}
+<NOTES>"(-" {BEGIN NOTESNEG;}
+<NOTES>[#b] {yylval.id= strdup(yytext); return T_INFO1;}
+<NOTES>[-.]+ {yylval.id= strdup(yytext); return T_INFO2;}
+<NOTES>"S" {yylval.num = 0; return T_NUM;}
+<NOTES>[[:space:]] {return T_SPACE;}
+<NOTES>")" {BEGIN MUSIQUE; return T_NOTESFIN;}
+
+<NOTESNEG>[[:digit:]]+ {yylval.num = -atoi(yytext); return T_NUM;}
+<NOTESNEG>")" {BEGIN NOTES;}
+
+<MUSIQUE>[,/] {return yytext[0];}
+<MUSIQUE>[[:alpha:]](_|#|[[:alnum:]])* {yylval.id= strdup(yytext); return T_ID;}
+<MUSIQUE>[[:digit:]]+ {yylval.num = atoi(yytext); return T_NUM;}
+<MUSIQUE>"}" {BEGIN INITIAL; return T_MUSIQUEFIN;}
+<MUSIQUE>[[:space:]] {;}
 
 [[:digit:]]+ {yylval.num = atoi(yytext); return T_NUM;}
 [[:alpha:]](_|[[:alnum:]])* {yylval.id= strdup(yytext); return T_ID;}
