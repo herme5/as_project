@@ -15,64 +15,39 @@ int get_octave(char *tonique){
 	return res;
 }
 
-char *get_note2(int addtonote, char *tonique, int previous_note, int previous_octave, char *info1){
-	int octave;
-	int dif = addtonote - previous_note;
-	while(dif > 7){
-		dif -=7;
-	}
-	while(dif < -7){
-		dif +=7;
-	}
-	if(dif < -4){
-		octave = -1;
-	}
-	else if(dif  > 4){
-		octave = 1;
-	}
-	else{
-		octave = 0;
-	}
+char *get_note2(int addtonote, char *tonique, int octave, char *info1){
 	if (addtonote == 0)
 		return "r";
 	int note_tonique = get_tonique_int(tonique);
 	int diff = get_diff(tonique);
 	int gamme = -1;
-	if (tonique[strlen(tonique)-1]='M'){
+
+	if (tonique[strlen(tonique)-1]=='M'){
 		gamme = 1;
 	}
-	if (tonique[strlen(tonique)-1]='m'){
+	if (tonique[strlen(tonique)-1]=='m'){
 		gamme = 0;
 	}
 	assert (gamme!=-1);
 	while (addtonote > 7){
 		addtonote = addtonote - 7;
-		octave ++;
 	}
 	while (addtonote < -7){
 		addtonote = addtonote + 7;
-		octave --;
 	}
 	if (addtonote>0){
         if (addtonote>4){
-            octave++;
         }
     }
     if (addtonote<0){
         if (addtonote<-4){
-            octave--;
         }
     }
-
 	char *note_brute = get_note3(addtonote, note_tonique, diff, gamme);
 
 	char *note_modif = set_diff(note_brute, info1);
     
-    int real_octave = octave - previous_octave;
-
-    char *octave_char = get_octave_char(real_octave);
-
-    //TODO : ecrire le nombre d'octaves, concatener les chaines, return
+    char *octave_char = get_octave_char(octave);
 
     char *buffer = malloc(1000*sizeof(char));
 	sprintf(buffer, "%s%s", note_modif, octave_char);

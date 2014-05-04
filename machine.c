@@ -265,34 +265,37 @@ char *lily(struct expr* musique){
   char *notes = malloc(1000*sizeof(char));
   struct expr *tmp = liste;
   int previous_note = 1;
-  int previous_octave = 0;
+  int octave = 0;
 
   if (tmp != NULL){
     while(tmp->expr->cell.cdr != NULL){
       if (tmp->expr->cell.car != NULL){
-        strcat(notes, get_note(tmp->expr->cell.car, tonique, dureenum, dureeden, previous_note, previous_octave));
+        int note_tmp = tmp->expr->cell.car->expr->note.valeur;
+        int ecart = note_tmp - previous_note;
+        octave = 0;
+        while (ecart>7){
+          ecart = ecart - 7;
+          octave++;
+        }
+        while (ecart<-7){
+          ecart = ecart + 7;
+          octave--;
+        }
+        if (ecart>0){
+            if (ecart>4){
+              octave++;
+            }
+          }
+          if (ecart<0){
+            if (ecart<-4){
+              octave--;
+            }
+          }
+        strcat(notes, get_note(tmp->expr->cell.car, tonique, dureenum, dureeden, octave));
         if (tmp->expr->cell.car->expr->note.valeur!= 0){
 
           int n = tmp->expr->cell.car->expr->note.valeur;
           previous_note = n;
-          while (n>7){
-            n = n-7;
-            previous_octave++;
-          }
-          while (n<-7){
-            n = n+7;
-            previous_octave--;
-          }
-          if (n>0){
-            if (n>4){
-              previous_octave++;
-            }
-          }
-          if (n<0){
-            if (n<-4){
-              previous_octave--;
-            }
-          }
         }
         tmp = (tmp->expr->cell.cdr);
       }
@@ -304,8 +307,8 @@ char *lily(struct expr* musique){
   return c;
 }
 
-char *get_note(struct expr* note, char *tonique, int dureenum, int dureeden, int previous_note, int previous_octave){
-  char *notechar = get_note2(note->expr->note.valeur, tonique, previous_note, previous_octave, note->expr->note.info1);
+char *get_note(struct expr* note, char *tonique, int dureenum, int dureeden, int octave){
+  char *notechar = get_note2(note->expr->note.valeur, tonique, octave, note->expr->note.info1);
   int temps = 4*dureeden/dureenum;
   char *temp = note->expr->note.info2;
   while (temp[0] != '\0'){

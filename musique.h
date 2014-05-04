@@ -1,4 +1,4 @@
-char *get_note2(int addtonote, char *tonique, int previous_note, int previous_octave, char *info1);
+char *get_note2(int addtonote, char *tonique, int octave, char *info1);
 int get_tonique_int(char *tonique);
 int get_diff(char *tonique);
 char *set_diff(char* note, char *info1);

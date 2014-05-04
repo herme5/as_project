@@ -48,7 +48,7 @@ void print_note(struct expr *note);
 char *draw_expr(struct expr *form);
 char *lily_list(struct expr *list);
 char *lily(struct expr *musique);
-char *get_note(struct expr* note, char *tonique, int dureenum, int dureeden, int previous_note, int previous_octave);
+char *get_note(struct expr* note, char *tonique, int dureenum, int dureeden, int octave);
 
 
 int element_equal(struct expr *e1, struct expr *e2);
