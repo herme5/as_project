@@ -167,28 +167,28 @@ char *draw_expr(struct expr *form){
     
   case POINT :
     sprintf(buffer,
-	    "context.beginPath();\ncontext.fillStyle='black';\ncontext.arc(%d,%d,4,0,2*Math.PI,true);\ncontext.fill();\n\n",
-	    form->expr->point.abs,
-	    form->expr->point.ord);
+      "context.beginPath();\ncontext.fillStyle='black';\ncontext.arc(%d,%d,4,0,2*Math.PI,true);\ncontext.fill();\n\n",
+      form->expr->point.abs,
+      form->expr->point.ord);
     break;
   case BEZIER :
     sprintf(buffer,
-	    "context.beginPath();\ncontext.moveTo(%d,%d);\ncontext.bezierCurveTo(%d,%d,%d,%d,%d,%d);\ncontext.strokeStyle='black';\ncontext.stroke();\n\n",
-	    form->expr->bezier.point1->expr->point.abs,
-	    form->expr->bezier.point1->expr->point.ord,
-	    form->expr->bezier.point2->expr->point.abs,
-	    form->expr->bezier.point2->expr->point.ord,
-	    form->expr->bezier.point3->expr->point.abs,
-	    form->expr->bezier.point3->expr->point.ord,
-	    form->expr->bezier.point4->expr->point.abs,
-	    form->expr->bezier.point4->expr->point.ord);
+      "context.beginPath();\ncontext.moveTo(%d,%d);\ncontext.bezierCurveTo(%d,%d,%d,%d,%d,%d);\ncontext.strokeStyle='black';\ncontext.stroke();\n\n",
+      form->expr->bezier.point1->expr->point.abs,
+      form->expr->bezier.point1->expr->point.ord,
+      form->expr->bezier.point2->expr->point.abs,
+      form->expr->bezier.point2->expr->point.ord,
+      form->expr->bezier.point3->expr->point.abs,
+      form->expr->bezier.point3->expr->point.ord,
+      form->expr->bezier.point4->expr->point.abs,
+      form->expr->bezier.point4->expr->point.ord);
     break;
   case CIRCLE :
     sprintf(buffer,
-	    "context.beginPath();\ncontext.arc(%d,%d,%d,0,Math.PI*2);\ncontext.stroke();\n\n",
-	    form->expr->circle.centre->expr->point.abs,
-	    form->expr->circle.centre->expr->point.ord,
-	    form->expr->circle.rayon);
+      "context.beginPath();\ncontext.arc(%d,%d,%d,0,Math.PI*2);\ncontext.stroke();\n\n",
+      form->expr->circle.centre->expr->point.abs,
+      form->expr->circle.centre->expr->point.ord,
+      form->expr->circle.rayon);
     break;
   case PATH :
     tmp = form;
@@ -197,16 +197,16 @@ char *draw_expr(struct expr *form){
       break ;
 
     sprintf(buffer, "context.beginPath();\ncontext.moveTo(%d,%d);\n",
-	    tmp->expr->cell.car->expr->point.abs,
-	    tmp->expr->cell.car->expr->point.ord);
+      tmp->expr->cell.car->expr->point.abs,
+      tmp->expr->cell.car->expr->point.ord);
 
     while(tmp->expr->cell.cdr != NULL){
       struct expr *nxt = tmp->expr->cell.cdr->expr->cell.car;
       sprintf(buffer,
-	      "%scontext.lineTo(%d,%d);\n",
-	      buffer,
-	      nxt->expr->point.abs,
-	      nxt->expr->point.ord);
+        "%scontext.lineTo(%d,%d);\n",
+        buffer,
+        nxt->expr->point.abs,
+        nxt->expr->point.ord);
       tmp = (tmp->expr->cell.cdr);
     }
     sprintf(buffer, "%s\ncontext.stroke();\ncontext.closePath();\n\n", buffer);
@@ -219,7 +219,8 @@ char *draw_expr(struct expr *form){
 char *lily_list(struct expr *list){
   assert(list->type == CELL);
   char* c = malloc(10000*sizeof(char));
-  strcat (c, "\\score {\n{\\new Staff {\n\\set Staff.instrumentName = \"Basse\"\n\\set Staff.midiInstrument = \"electric bass (pick)\"");
+  //strcat (c, "\\score {\n{\\new Staff {\n\\set Staff.instrumentName = \"Basse\"\n\\set Staff.midiInstrument = \"electric bass (pick)\"");
+  strcat (c, "\\score {\n{\\new Staff {\n\\set Staff.instrumentName = \"Piano\"\n\\set Staff.midiInstrument = \"acoustic grand\"");
   struct expr *tmp = list;
   int i = 0;
   if (tmp == NULL)
@@ -230,7 +231,7 @@ char *lily_list(struct expr *list){
     }
     tmp = (tmp->expr->cell.cdr);
   }
-  strcat (c, "}}\n\\layout { }\n\\midi { \\tempo 4=110 }\n}");
+  strcat (c, "}}\n\\layout { }\n\\midi { \\tempo 4=130 }\n}");
   return c;
 }
 
@@ -701,37 +702,37 @@ void step(struct configuration *conf){
       struct expr * c1,* c2;
       
       if(conf->closure->expr->type == NUM){
-	k1 = get_num(conf);
-	switch(expr->expr->op){
-	case NOT : conf->closure->expr->expr->num = !k1; return;
-	default : ;
-	}
+  k1 = get_num(conf);
+  switch(expr->expr->op){
+  case NOT : conf->closure->expr->expr->num = !k1; return;
+  default : ;
+  }
       }
       if(conf->closure->expr->type == POINT){
-	c1 = conf->closure->expr;
-	if (expr->expr->op == ADDPATH && stack==NULL){
-	  conf->closure = mk_closure(mk_path(c1,NULL),NULL);return;
-	}
+  c1 = conf->closure->expr;
+  if (expr->expr->op == ADDPATH && stack==NULL){
+    conf->closure = mk_closure(mk_path(c1,NULL),NULL);return;
+  }
       }
       if(conf->closure->expr->type == CIRCLE){
-	c1 = conf->closure->expr;
+  c1 = conf->closure->expr;
       }
       if(conf->closure->expr->type == BEZIER){
-	c1 = conf->closure->expr;
+  c1 = conf->closure->expr;
       }
       if(conf->closure->expr->type == PATH){
-	c1 = conf->closure->expr;
+  c1 = conf->closure->expr;
       }
       if(conf->closure->expr->type == MUSIQUE){
   c1 = conf->closure->expr;
       }
       if(conf->closure->expr->type == CELL){
-	c1 = conf->closure->expr;
-	switch(expr->expr->op){
-	case HEAD: conf->closure = mk_closure(mk_head(conf->closure->expr),NULL); return;
-	case TAIL: conf->closure = mk_closure(mk_tail(conf->closure->expr),NULL); return;
-	default: ;
-	}
+  c1 = conf->closure->expr;
+  switch(expr->expr->op){
+  case HEAD: conf->closure = mk_closure(mk_head(conf->closure->expr),NULL); return;
+  case TAIL: conf->closure = mk_closure(mk_tail(conf->closure->expr),NULL); return;
+  default: ;
+  }
       }
       
       if(stack == NULL){return;}
@@ -743,60 +744,60 @@ void step(struct configuration *conf){
       step(conf);
       
       if(conf->closure->expr->type == NUM){
-	k2 = get_num(conf);
-	switch (expr->expr->op){
-	case SETABS:   conf->closure = mk_closure(set_abs(c1,k2),NULL);return;
-	case SETORD:   conf->closure = mk_closure(set_ord(c1,k2),NULL);return;
-	case SETRAYON: conf->closure = mk_closure(set_rayon(c1,k2),NULL);return;
+  k2 = get_num(conf);
+  switch (expr->expr->op){
+  case SETABS:   conf->closure = mk_closure(set_abs(c1,k2),NULL);return;
+  case SETORD:   conf->closure = mk_closure(set_ord(c1,k2),NULL);return;
+  case SETRAYON: conf->closure = mk_closure(set_rayon(c1,k2),NULL);return;
 
-	case PLUS:  conf->closure = mk_closure(mk_int(k1 + k2 ),NULL);return;
-	case MINUS: conf->closure = mk_closure(mk_int(k1 - k2 ),NULL);return;
-	case MULT:  conf->closure = mk_closure(mk_int(k1 * k2 ),NULL);return;
-	case DIV:   assert(k2!=0);
-	  conf->closure = mk_closure(mk_int(k1 /  k2),NULL);return;
-	case MOD:   conf->closure = mk_closure(mk_int(k1 %  k2),NULL);return;
-	case LEQ:   conf->closure = mk_closure(mk_int(k1 <= k2),NULL);return;
-	case LE:    conf->closure = mk_closure(mk_int(k1 <  k2),NULL);return;
-	case GEQ:   conf->closure = mk_closure(mk_int(k1 >= k2),NULL);return;
-	case GE:    conf->closure = mk_closure(mk_int(k1 >  k2),NULL);return;
-	case EQ:    conf->closure = mk_closure(mk_int(k1 == k2),NULL);return;
-	case OR:    conf->closure = mk_closure(mk_int(k1 || k2),NULL);return;
-	case AND:   conf->closure = mk_closure(mk_int(k1 && k2),NULL);return;
-	default:    ;
-	}
+  case PLUS:  conf->closure = mk_closure(mk_int(k1 + k2 ),NULL);return;
+  case MINUS: conf->closure = mk_closure(mk_int(k1 - k2 ),NULL);return;
+  case MULT:  conf->closure = mk_closure(mk_int(k1 * k2 ),NULL);return;
+  case DIV:   assert(k2!=0);
+    conf->closure = mk_closure(mk_int(k1 /  k2),NULL);return;
+  case MOD:   conf->closure = mk_closure(mk_int(k1 %  k2),NULL);return;
+  case LEQ:   conf->closure = mk_closure(mk_int(k1 <= k2),NULL);return;
+  case LE:    conf->closure = mk_closure(mk_int(k1 <  k2),NULL);return;
+  case GEQ:   conf->closure = mk_closure(mk_int(k1 >= k2),NULL);return;
+  case GE:    conf->closure = mk_closure(mk_int(k1 >  k2),NULL);return;
+  case EQ:    conf->closure = mk_closure(mk_int(k1 == k2),NULL);return;
+  case OR:    conf->closure = mk_closure(mk_int(k1 || k2),NULL);return;
+  case AND:   conf->closure = mk_closure(mk_int(k1 && k2),NULL);return;
+  default:    ;
+  }
       }
 
       if(conf->closure->expr->type == POINT){
-	c2 = conf->closure->expr;
-	switch (expr->expr->op){
-	case SETCENTRE: conf->closure = mk_closure(set_centre(c1,c2),NULL);return;
-	case SETPOINT1: conf->closure = mk_closure(set_point(c1,c2,1),NULL);return;
-	case SETPOINT2: conf->closure = mk_closure(set_point(c1,c2,2),NULL);return;
-	case SETPOINT3: conf->closure = mk_closure(set_point(c1,c2,3),NULL);return;
-	case SETPOINT4: conf->closure = mk_closure(set_point(c1,c2,4),NULL);return;
-	case TRANSLATION: conf->closure = mk_closure(translation(c1,c2),NULL);return;
-	default: ;
-	}
+  c2 = conf->closure->expr;
+  switch (expr->expr->op){
+  case SETCENTRE: conf->closure = mk_closure(set_centre(c1,c2),NULL);return;
+  case SETPOINT1: conf->closure = mk_closure(set_point(c1,c2,1),NULL);return;
+  case SETPOINT2: conf->closure = mk_closure(set_point(c1,c2,2),NULL);return;
+  case SETPOINT3: conf->closure = mk_closure(set_point(c1,c2,3),NULL);return;
+  case SETPOINT4: conf->closure = mk_closure(set_point(c1,c2,4),NULL);return;
+  case TRANSLATION: conf->closure = mk_closure(translation(c1,c2),NULL);return;
+  default: ;
+  }
       }
 
       if(conf->closure->expr->type == CELL){
-	c2 = conf->closure->expr;
-	switch (expr->expr->op){
-	case CONS:   conf->closure = mk_closure(mk_cell(e1,c2),NULL);return;
-	case APPEND: conf->closure = mk_closure(mk_append(c1,c2),NULL);return;
-	case HEADN:  conf->closure = mk_closure(mk_headn(c2,e1),NULL);return;
-	case EQ:     conf->closure = mk_closure(mk_int(list_equal(c1,c2)),NULL);return;
+  c2 = conf->closure->expr;
+  switch (expr->expr->op){
+  case CONS:   conf->closure = mk_closure(mk_cell(e1,c2),NULL);return;
+  case APPEND: conf->closure = mk_closure(mk_append(c1,c2),NULL);return;
+  case HEADN:  conf->closure = mk_closure(mk_headn(c2,e1),NULL);return;
+  case EQ:     conf->closure = mk_closure(mk_int(list_equal(c1,c2)),NULL);return;
   case SETLIST: conf->closure = mk_closure(set_list(c1,c2),NULL);return;
-	default:     assert(0);
-	}
+  default:     assert(0);
+  }
       }
       
       if (conf->closure->expr->type == PATH){
-	c2 = conf->closure->expr;
-	switch (expr->expr->op){
-	case ADDPATH: conf->closure = mk_closure(mk_path(c1,c2),NULL);return;
-	default: assert(0);
-	}
+  c2 = conf->closure->expr;
+  switch (expr->expr->op){
+  case ADDPATH: conf->closure = mk_closure(mk_path(c1,c2),NULL);return;
+  default: assert(0);
+  }
       }
       
       if(stack == NULL){return;}
@@ -808,12 +809,12 @@ void step(struct configuration *conf){
       step(conf);
 
       if (conf->closure->expr->type==NUM){
-	struct expr* e3 = conf->closure->expr;
-	switch (expr->expr->op){
-	case ROTATION:   conf->closure = mk_closure(rotation(c1,c2,e3),NULL); return;
-	case HOMOTHETIE: conf->closure = mk_closure(homothetie(c1,c2,e3),NULL); return;
-	default : assert(0);
-	}			
+  struct expr* e3 = conf->closure->expr;
+  switch (expr->expr->op){
+  case ROTATION:   conf->closure = mk_closure(rotation(c1,c2,e3),NULL); return;
+  case HOMOTHETIE: conf->closure = mk_closure(homothetie(c1,c2,e3),NULL); return;
+  default : assert(0);
+  }     
       }
     };
   default: assert(0);

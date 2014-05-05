@@ -154,5 +154,7 @@ let premiers = fun n -> (rev (premiers_rev n));
 let fob1 = {(2. 2 2. 2 4.. 4. 1 1 1. (-2)b. (-2)b (-2)b. (-2)b 4.. 4. 1 1 1.), La1M, 1/4};
 //print([fob1, fob1, fob1, fob1]);
 
-let beethoven = {(15 14 15 14 15 12 14b 13b 11 1 4 6b 8 11 12 1 4b 8 10 12 13b 1 4 8), Mi3M, 1/2};
-print([beethoven, beethoven]);
+let beethoven1 = {(15 14 15 14 15 12 14b 13b 11 1 4 6b 8 11 12 1 4b 8 10 12 13b 1 4 8), Mi3M, 1/2};
+let beethoven2 = {(15 14 15 14 15 12 14b 13b 11 1 4 6b 8 11 12 1 4b 8 13b 12 11..), Mi3M, 1/2};
+print([fob1, fob1, beethoven1, beethoven2]);
+
