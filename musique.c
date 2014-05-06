@@ -46,7 +46,7 @@ char *get_note2(int addtonote, char *tonique, int octave, char *info1){
 	char *note_brute = get_note3(addtonote, note_tonique, diff, gamme);
 
 	char *note_modif = set_diff(note_brute, info1);
-    
+
     char *octave_char = get_octave_char(octave);
 
     char *buffer = malloc(1000*sizeof(char));
@@ -163,7 +163,7 @@ char *get_note_diese(int realaddtonote, int realnote){
 2 Si Dob -> les 2 gammes
 3 Do Si# -> pas de gamme si#
 4 Do# Reb -> les 2 gammes
-5 Re 
+5 Re
 6 Mib Re# -> pas de Re#
 7 Mi Fab -> pas de Fab
 8 Fa Mi# -> pas de Mi#
@@ -181,7 +181,7 @@ char *get_note3(int addtonote, int note_tonique, int diff, int gamme){
 	int realaddtonote;
 	switch (addtonote){
 		case 1: realaddtonote = 0; break;
-		case 2: realaddtonote = 2; break; 
+		case 2: realaddtonote = 2; break;
 		case 3: realaddtonote = 3+gamme; break;
 		case 4: realaddtonote = 5; break;
 		case 5: realaddtonote = 7; break;
@@ -203,7 +203,7 @@ char *get_note3(int addtonote, int note_tonique, int diff, int gamme){
 				case -1: //bemol
 					return get_note_bemol(realaddtonote, 4);
 				case 0:
-					return get_note_bemol(realaddtonote, 5);
+					return get_note_diese(realaddtonote, 5);
 				case 1: //dièse
 					return get_note_bemol(realaddtonote, 6);
 			}
@@ -280,4 +280,40 @@ int get_diff(char *tonique){
 			return 1;
 	}
 	return 0;
+}
+
+int get_real_tonique_int(char *tonique){
+   switch (get_diff(tonique)){
+      case -1:
+         switch (get_tonique_int(tonique)){
+            case 0: return 11;
+            case 1: return 1;
+            case 2: return 3;
+            case 3: return 4;
+            case 4: return 6;
+            case 5: return 8;
+            case 6: return 12;
+         }
+      case 0:
+         switch (get_tonique_int(tonique)){
+            case 0: return 0;
+            case 1: return 2;
+            case 2: return 4;
+            case 3: return 5;
+            case 4: return 7;
+            case 5: return 9;
+            case 6: return 11;
+         }
+      case 1:
+         switch (get_tonique_int(tonique)){
+            case 0: return 1;
+            case 1: return 3;
+            case 2: return 5;
+            case 3: return 6;
+            case 4: return 8;
+            case 5: return 10;
+            case 6: return 0;
+         }
+   }
+   return -1;
 }

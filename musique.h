@@ -1,6 +1,7 @@
 char *get_note2(int addtonote, char *tonique, int octave, char *info1);
 int get_tonique_int(char *tonique);
 int get_diff(char *tonique);
+int get_real_tonique_int(char *tonique);
 char *set_diff(char* note, char *info1);
 char *get_note3(int addtonote, int note_tonique, int diff, int gamme);
 char *get_note_bemol(int realaddtonote, int realnote);

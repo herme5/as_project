@@ -334,6 +334,47 @@ char *get_note(struct expr* note, char *tonique, int dureenum, int dureeden, int
   return buffer;
 }
 
+struct expr *transposition (struct expr *musique, char* tonique1, char* tonique2){
+   struct expr* res = musique;
+   if (strcmp(res->expr->musique.tonique,tonique1)==0){
+      res->expr->musique.tonique = tonique2;
+   }
+   else {
+      int t1 = get_real_tonique_int(tonique1);
+      printf("t1 = %d\n", t1);
+      int t2 = get_real_tonique_int(tonique2);
+      printf("t2 = %d\n", t2);
+      int octave = get_octave(res->expr->musique.tonique)+get_octave(tonique2)-get_octave(tonique1);
+      int tonique = t2 - t1;
+      if (tonique < 0){
+         tonique+=12;
+         octave --;
+      }
+      tonique += get_real_tonique_int(res->expr->musique.tonique);
+      if (tonique>11){
+         tonique -= 12;
+         octave ++;
+      }
+      char * note = malloc(100*sizeof(char));
+      switch (tonique){
+         case 0: note = "La"; break;
+         case 1: note = "Sib"; break;
+         case 2: note = "Si"; break;
+         case 3: note = "Do"; break;
+         case 4: note = "Do#"; break;
+         case 5: note = "Re"; break;
+         case 6: note = "Re#"; break;
+         case 7: note = "Mi"; break;
+         case 8: note = "Fa"; break;
+         case 9: note = "Fa#"; break;
+         case 10: note = "Sol"; break;
+         case 11: note = "Sol#"; break;
+      }
+      sprintf(res->expr->musique.tonique, "%s%d%c", note, octave, tonique2[strlen(tonique2)-1]);
+   }
+   return res;
+}
+
 void print_bezier(struct expr *bezier){
    printf("(");
    print_expr(bezier->expr->bezier.point1);
@@ -581,6 +622,7 @@ struct expr* rotation(struct expr* elem, struct expr* centre, struct expr* angle
   return elem;
 }
 
+
 struct expr *homothetie(struct expr *elem, struct expr *centre, struct expr *ratio){
   assert (centre->type == POINT && ratio->type == NUM);
 
@@ -678,6 +720,8 @@ void step(struct configuration *conf){
       }
       return step(conf);
     }
+  case TONIQUE:
+    return;
   case NUM:
     return;
   case POINT:
@@ -708,7 +752,9 @@ void step(struct configuration *conf){
 
       int k1, k2;
       struct expr * e1 = conf->closure->expr;
-      struct expr * c1,* c2;
+      struct expr * c1,* c2,* m1;
+      char * ch1,* ch2;
+
 
       if(conf->closure->expr->type == NUM){
   k1 = get_num(conf);
@@ -733,10 +779,11 @@ void step(struct configuration *conf){
   c1 = conf->closure->expr;
       }
       if(conf->closure->expr->type == MUSIQUE){
-  c1 = conf->closure->expr;
+  m1 = conf->closure->expr;
       }
       if(conf->closure->expr->type == CELL){
-  c1 = conf->closure->expr;
+         c1 = conf->closure->expr;
+
   switch(expr->expr->op){
   case HEAD: conf->closure = mk_closure(mk_head(conf->closure->expr),NULL); return;
   case TAIL: conf->closure = mk_closure(mk_tail(conf->closure->expr),NULL); return;
@@ -751,6 +798,10 @@ void step(struct configuration *conf){
       conf->closure = arg2;
       conf->stack = NULL;
       step(conf);
+
+      if(conf->closure->expr->type == TONIQUE){
+         ch1 = conf->closure->expr->expr->id;
+      }
 
       if(conf->closure->expr->type == NUM){
   k2 = get_num(conf);
@@ -796,8 +847,8 @@ void step(struct configuration *conf){
   case APPEND: conf->closure = mk_closure(mk_append(c1,c2),NULL);return;
   case HEADN:  conf->closure = mk_closure(mk_headn(c2,e1),NULL);return;
   case EQ:     conf->closure = mk_closure(mk_int(list_equal(c1,c2)),NULL);return;
-  case SETLIST: conf->closure = mk_closure(set_list(c1,c2),NULL);return;
-  default:     assert(0);
+  case SETLIST: conf->closure = mk_closure(set_list(m1,c2),NULL);return;
+  default:     ;
   }
       }
 
@@ -805,7 +856,7 @@ void step(struct configuration *conf){
   c2 = conf->closure->expr;
   switch (expr->expr->op){
   case ADDPATH: conf->closure = mk_closure(mk_path(c1,c2),NULL);return;
-  default: assert(0);
+  default: ;
   }
       }
 
@@ -817,6 +868,13 @@ void step(struct configuration *conf){
       conf->stack = NULL;
       step(conf);
 
+      if (conf->closure->expr->type==TONIQUE){
+         ch2 = conf->closure->expr->expr->id;
+         switch (expr->expr->op){
+            case TRANS: conf->closure = mk_closure(transposition(m1, ch1, ch2),NULL); return;
+            default : ;
+         }
+      }
       if (conf->closure->expr->type==NUM){
   struct expr* e3 = conf->closure->expr;
   switch (expr->expr->op){

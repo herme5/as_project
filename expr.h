@@ -1,7 +1,7 @@
 
-enum expr_kind {ID, FUN, APP, NUM, OP, COND, CELL, NIL, POINT, PATH, CIRCLE, BEZIER, MUSIQUE, NOTE};
+enum expr_kind {ID, FUN, APP, NUM, OP, COND, CELL, NIL, POINT, PATH, CIRCLE, BEZIER, MUSIQUE, NOTE, TONIQUE};
 
-enum op{PLUS, MINUS, MULT, DIV, MOD, LEQ, LE, GEQ, GE, EQ, OR, AND, NOT, CONS, HEAD, TAIL, APPEND, HEADN, SETABS, SETORD, SETRAYON, SETCENTRE, SETPOINT1, SETPOINT2, SETPOINT3, SETPOINT4, ADDPATH, TRANSLATION, ROTATION, HOMOTHETIE, SETLIST};
+enum op{PLUS, MINUS, MULT, DIV, MOD, LEQ, LE, GEQ, GE, EQ, OR, AND, NOT, CONS, HEAD, TAIL, APPEND, HEADN, SETABS, SETORD, SETRAYON, SETCENTRE, SETPOINT1, SETPOINT2, SETPOINT3, SETPOINT4, ADDPATH, TRANSLATION, ROTATION, HOMOTHETIE, SETLIST, TRANS};
 
 struct expr;
 
@@ -87,6 +87,7 @@ struct expr *mk_reverse (struct expr *list1, struct expr *list2);
 
 struct expr *mk_node (void);
 struct expr *mk_id   (char *id);
+struct expr *mk_tonique (char *tonique);
 struct expr *mk_fun  (char *id, struct expr *body);
 struct expr *mk_app  (struct expr *fun, struct expr *arg);
 struct expr *mk_op   (enum op op);

@@ -16,6 +16,13 @@ struct expr *mk_id(char *id){
   return e;
 }
 
+struct expr *mk_tonique(char *tonique){
+   struct expr *e = mk_node();
+   e->type = TONIQUE;
+   e->expr->id = tonique;
+   return e;
+}
+
 struct expr *mk_fun(char *id, struct expr *body){
   struct expr *e = mk_node();
   e->type = FUN;

@@ -64,3 +64,4 @@ struct expr *set_list (struct expr *musique, struct expr *list);
 struct expr *translation(struct expr *elem, struct expr *vecteur);
 struct expr *rotation   (struct expr *elem, struct expr *centre, struct expr *angle);
 struct expr *homothetie (struct expr *elem, struct expr *centre, struct expr *ratio);
+struct expr *transposition (struct expr *musique, char* tonique1, char* tonique2);

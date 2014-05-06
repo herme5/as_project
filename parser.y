@@ -223,7 +223,7 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 
 /*MUSIQUE*/
 | musique {$$ = $1;}
-//| '('T_TRANS e T_ID T_ID')' {$$ = }
+| '('T_TRANS e T_ID T_ID')' {$$ = mk_app(mk_app(mk_app(mk_op(TRANS),$3),mk_tonique($4)),mk_tonique($5));}
 
 ;
 
