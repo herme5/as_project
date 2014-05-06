@@ -47,6 +47,8 @@ homothetie {return T_HOMOT;}
 draw {return T_DRAW;}
 print {return T_PRINT;}
 
+trans {return T_TRANS;}
+
 <INITIAL>"/*"     {BEGIN COM;}
 <INITIAL>"//".*\n {;}
 

@@ -76,7 +76,7 @@ void print_list(struct expr *list){
 
   if (tmp == NULL)
     return ;
-  
+
   while(tmp->expr->cell.cdr != NULL){
     print_expr(tmp->expr->cell.car);
     tmp = (tmp->expr->cell.cdr);
@@ -92,7 +92,7 @@ void print_musique_liste(struct expr *list){
 
   if (tmp == NULL)
     return ;
-  
+
   while(tmp->expr->cell.cdr != NULL){
     print_expr(tmp->expr->cell.car);
     tmp = (tmp->expr->cell.cdr);
@@ -162,9 +162,9 @@ char *draw_expr(struct expr *form){
 
   char *buffer = malloc(10000 * sizeof(char));
   struct expr *tmp;
-  
+
   switch(form->type){
-    
+
   case POINT :
     sprintf(buffer,
       "context.beginPath();\ncontext.fillStyle='black';\ncontext.arc(%d,%d,4,0,2*Math.PI,true);\ncontext.fill();\n\n",
@@ -212,26 +212,35 @@ char *draw_expr(struct expr *form){
     sprintf(buffer, "%s\ncontext.stroke();\ncontext.closePath();\n\n", buffer);
     break;
   default : break;}
-  
+
   return buffer;
 }
 
-char *lily_list(struct expr *list){
+char *lily_list(struct expr *list, int first){
   assert(list->type == CELL);
   char* c = malloc(10000*sizeof(char));
-  //strcat (c, "\\score {\n{\\new Staff {\n\\set Staff.instrumentName = \"Basse\"\n\\set Staff.midiInstrument = \"electric bass (pick)\"");
-  strcat (c, "\\score {\n{\\new Staff {\n\\set Staff.instrumentName = \"Piano\"\n\\set Staff.midiInstrument = \"acoustic grand\"");
+  if (first){
+     //strcat (c, "\\score {\n{\\new Staff {\n\\set Staff.instrumentName = \"Basse\"\n\\set Staff.midiInstrument = \"electric bass (pick)\"");
+     strcat (c, "\\score {\n{\\new Staff {\n\\set Staff.instrumentName = \"Piano\"\n\\set Staff.midiInstrument = \"acoustic grand\"\n");
+  }
   struct expr *tmp = list;
   int i = 0;
   if (tmp == NULL)
     return c;
   while(tmp->expr->cell.cdr != NULL){
     if (tmp->expr->cell.car != NULL){
-      strcat(c, lily(tmp->expr->cell.car));
+       if (tmp->expr->cell.car->type == CELL){
+          strcat(c, lily_list(tmp->expr->cell.car, 0));
+       }
+       else{
+          strcat(c, lily(tmp->expr->cell.car));
+       }
     }
     tmp = (tmp->expr->cell.cdr);
   }
-  strcat (c, "}}\n\\layout { }\n\\midi { \\tempo 4=130 }\n}");
+  if (first){
+     strcat (c, "}}\n\\layout { }\n\\midi { \\tempo 4=130 }\n}");
+  }
   return c;
 }
 
@@ -318,7 +327,7 @@ char *get_note(struct expr* note, char *tonique, int dureenum, int dureeden, int
     if (temp[0]=='-')
       temps = temps/3;
     temp++;
-  } 
+  }
 
   char *buffer = malloc(1000*sizeof(char));
   sprintf(buffer," %s%d", notechar, temps);
@@ -410,24 +419,24 @@ void print_op(struct expr *op){
 int list_equal(struct expr *l1, struct expr *l2){
   if (l1 == NULL && l2 == NULL)
     return 1;
-  
+
   if (l1 == NULL || l2 == NULL)
     return 0;
-  
+
   if (l1->expr->cell.car == NULL && l2->expr->cell.car == NULL)
     return 1;
-  
+
   if (l1->expr->cell.car == NULL || l2->expr->cell.car == NULL)
     return 0;
-  
+
   if (element_equal(l1->expr->cell.car, l2->expr->cell.car))
     return list_equal(l1->expr->cell.cdr, l2->expr->cell.cdr);
-  
+
   return 0;
 }
 
 int element_equal(struct expr *e1, struct expr *e2){
-  
+
   int bool_1 = e1->type == e2->type;
   int bool_2 = e1->type == NUM || e1->type == CELL;
   assert (bool_1 && bool_2);
@@ -493,7 +502,7 @@ struct expr* translation(struct expr* elem, struct expr* vecteur){
   int tmp_y;
   assert (vecteur->type==POINT);
   switch (elem->type){
-  case POINT: 
+  case POINT:
     tmp_x = elem->expr->point.abs;
     tmp_y = elem->expr->point.ord;
     elem = mk_point();
@@ -501,14 +510,14 @@ struct expr* translation(struct expr* elem, struct expr* vecteur){
     elem = set_ord(elem, tmp_y+y);
     break;
 
-  case PATH: 
+  case PATH:
 
     while(tmp->expr->cell.cdr != NULL){
       tmp->expr->cell.car = translation(tmp->expr->cell.car, vecteur);
       tmp = tmp->expr->cell.cdr;
     }
     tmp->expr->cell.car = translation(tmp->expr->cell.car, vecteur);
-    
+
     break;
 
   case CIRCLE:
@@ -538,7 +547,7 @@ struct expr* rotation(struct expr* elem, struct expr* centre, struct expr* angle
   int a = angle->expr->num;
 
   switch (elem->type){
-  case POINT: 
+  case POINT:
     tmp_x = elem->expr->point.abs;
     tmp_y = elem->expr->point.ord;
     elem = mk_point();
@@ -583,7 +592,7 @@ struct expr *homothetie(struct expr *elem, struct expr *centre, struct expr *rat
   int r = ratio->expr->num;
 
   switch (elem->type){
-  case POINT: 
+  case POINT:
     tmp_x = elem->expr->point.abs;
     tmp_y = elem->expr->point.ord;
     elem = mk_point();
@@ -627,7 +636,7 @@ void step(struct configuration *conf){
   struct env *env = conf->closure->env;
   struct stack *stack = conf->stack;
   assert(expr!=NULL);
-  
+
   switch (expr->type){
   case FUN:
     {
@@ -700,7 +709,7 @@ void step(struct configuration *conf){
       int k1, k2;
       struct expr * e1 = conf->closure->expr;
       struct expr * c1,* c2;
-      
+
       if(conf->closure->expr->type == NUM){
   k1 = get_num(conf);
   switch(expr->expr->op){
@@ -734,7 +743,7 @@ void step(struct configuration *conf){
   default: ;
   }
       }
-      
+
       if(stack == NULL){return;}
       arg1 = conf->closure;
       struct closure *arg2 = stack->closure;
@@ -742,7 +751,7 @@ void step(struct configuration *conf){
       conf->closure = arg2;
       conf->stack = NULL;
       step(conf);
-      
+
       if(conf->closure->expr->type == NUM){
   k2 = get_num(conf);
   switch (expr->expr->op){
@@ -791,7 +800,7 @@ void step(struct configuration *conf){
   default:     assert(0);
   }
       }
-      
+
       if (conf->closure->expr->type == PATH){
   c2 = conf->closure->expr;
   switch (expr->expr->op){
@@ -799,7 +808,7 @@ void step(struct configuration *conf){
   default: assert(0);
   }
       }
-      
+
       if(stack == NULL){return;}
       arg2 = conf->closure;
       struct closure *arg3 = stack->closure;
@@ -814,7 +823,7 @@ void step(struct configuration *conf){
   case ROTATION:   conf->closure = mk_closure(rotation(c1,c2,e3),NULL); return;
   case HOMOTHETIE: conf->closure = mk_closure(homothetie(c1,c2,e3),NULL); return;
   default : assert(0);
-  }     
+  }
       }
     };
   default: assert(0);

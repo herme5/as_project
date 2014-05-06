@@ -67,6 +67,8 @@ struct env *get_env(){
 %token<info1> T_INFO1
 %token<info2> T_INFO2
 %token T_SPACE
+%token T_TRANS
+
 
 %type<t_exp> e
 %type<t_exp> f
@@ -79,7 +81,6 @@ struct env *get_env(){
 %type<t_exp> notel
 %type<t_exp> notelist
 %type<t_exp> musique
-%type<t_exp> fin
 
 %left T_WHERE
 %right T_IN
@@ -115,27 +116,35 @@ s :
 
 | s EOE {;}
 
-| s fin EOE {
+| s e EOE {
   conf->closure = mk_closure($2,environment);
   conf->stack = NULL;
   step(conf);
   printf(">>> "); print_expr(conf->closure->expr); printf("\n");}
 
-| s T_LET T_REC T_ID[var] '=' fin[expr] EOE {
+| s T_LET T_REC T_ID[var] '=' e[expr] EOE {
   environment = push_rec_env($var,$expr,environment);
   struct closure * cl = mk_closure($expr,environment);
   conf->closure = cl;
   conf->stack = NULL;}
 
-| s T_LET T_ID[var] '=' fin[expr] EOE {
+| s T_LET T_ID[var] '=' e[expr] EOE {
   struct closure * cl = mk_closure($expr,environment);
+  conf->closure = cl;
+  conf->stack = NULL;
+  environment = push_env($var,cl,environment);}
+
+| s T_LET T_ID[var] '=' e[expr1] e[expr2] EOE {
+    struct expr *e = mk_cell(NULL,NULL);
+  e = mk_app(mk_app(mk_op(CONS),$expr2),e);
+  e = mk_app(mk_app(mk_op(CONS),$expr1),e);
+  struct closure * cl = mk_closure(e,environment);
   conf->closure = cl;
   conf->stack = NULL;
   environment = push_env($var,cl,environment);}
 ;
 
-fin : e {$$ = $1;}
-| musique {$$ = $1;}
+
 
 
 e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
@@ -157,7 +166,7 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | T_PRINT '(' e ')' {$$ = $3;
   conf->closure = mk_closure($3,environment);
   conf->stack=NULL; step(conf);
-  lily_write(lily_list(conf->closure->expr));}
+  lily_write(lily_list(conf->closure->expr, 1));}
 
 | e T_AND e   {$$ = mk_app(mk_app(mk_op(AND),$1),$3);}
 | e T_OR e    {$$ = mk_app(mk_app(mk_op(OR),$1),$3);}
@@ -212,6 +221,10 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 | T_ROTAT '(' e ',' e ',' e ')' {$$ = mk_app(mk_app(mk_app(mk_op(ROTATION),$3),$5),$7);}
 | T_HOMOT '(' e ',' e ',' e ')' {$$ = mk_app(mk_app(mk_app(mk_op(HOMOTHETIE),$3),$5),$7);}
 
+/*MUSIQUE*/
+| musique {$$ = $1;}
+//| '('T_TRANS e T_ID T_ID')' {$$ = }
+
 ;
 
 p : T_ID T_ARROW e {$$ = mk_fun ($1,$3);}
@@ -226,9 +239,7 @@ list: '[' l {$$ = $2;}
 ;
 
 l : e ']'   {$$ = mk_app(mk_app(mk_op(CONS),$1),mk_cell(NULL, NULL));}
-| musique ']'   {$$ = mk_app(mk_app(mk_op(CONS),$1),mk_cell(NULL, NULL));}
 | e',' l    {$$ = mk_app(mk_app(mk_op(CONS),$1),$3);}
-| musique',' l    {$$ = mk_app(mk_app(mk_op(CONS),$1),$3);}
 |']'        {$$ = mk_cell(NULL, NULL);}
 ;
 

@@ -63,7 +63,7 @@ let premier = fun n -> (premier_rec n (n-1));
 
 
 /*=========================
-test sur let in et where 
+test sur let in et where
 ===========================*/
 
 (square x) + x where x=2;
@@ -80,7 +80,7 @@ where z=2;
 
 
 /*========================
- test sur les listes 
+ test sur les listes
 ==========================*/
 
 let add = fun x -> x+3;
@@ -156,5 +156,5 @@ let fob1 = {(2. 2 2. 2 4.. 4. 1 1 1. (-2)b. (-2)b (-2)b. (-2)b 4.. 4. 1 1 1.), L
 
 let beethoven1 = {(15 14 15 14 15 12 14b 13b 11 1 4 6b 8 11 12 1 4b 8 10 12 13b 1 4 8), Mi3M, 1/2};
 let beethoven2 = {(15 14 15 14 15 12 14b 13b 11 1 4 6b 8 11 12 1 4b 8 13b 12 11..), Mi3M, 1/2};
-print([fob1, fob1, beethoven1, beethoven2]);
-
+let fob2 = fob1 fob1;
+print([fob2, beethoven1, beethoven2]);
