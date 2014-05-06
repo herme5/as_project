@@ -102,15 +102,35 @@ void print_musique_liste(struct expr *list){
   printf(")");
 }
 
+int PGCD(int a, int b){
+    while(b!=0){
+        int c=a%b;
+        a=b;
+        b=c;
+    }
+    return a;
+}
+
 void print_musique(struct expr *musique){
   printf("{");
   print_musique_liste(musique->expr->musique.liste);
   printf(", ");
   printf("%s",musique->expr->musique.tonique);
   printf(", ");
-  printf("%d", musique->expr->musique.dureenum);
-  if (musique->expr->musique.dureeden != 1){
-    printf("/%d", musique->expr->musique.dureeden);
+  int numerateur = musique->expr->musique.dureenum;
+  int denominateur = musique->expr->musique.dureeden;
+  int r;
+    r=PGCD(numerateur,denominateur);
+    numerateur=numerateur/r;
+    denominateur=denominateur/r;
+    //pas de - au dénominateur
+    if(denominateur<0){
+        numerateur=-numerateur;
+        denominateur=-denominateur;
+        }
+  printf("%d", numerateur);
+  if (denominateur != 1){
+    printf("/%d",musique->expr->musique.dureeden);
   }
   printf("}");
 }
@@ -373,6 +393,72 @@ struct expr *transposition (struct expr *musique, char* tonique1, char* tonique2
       sprintf(res->expr->musique.tonique, "%s%d%c", note, octave, tonique2[strlen(tonique2)-1]);
    }
    return res;
+}
+
+struct expr *addtomusic (struct expr *musique, int add){
+         struct expr *tmp = mk_node();
+      switch(musique->type){
+      case CELL:
+         tmp = musique;
+
+         if (tmp == NULL)
+            return tmp;
+         while(tmp->expr->cell.cdr != NULL){
+            if (tmp->expr->cell.car != NULL)
+              tmp->expr->cell.car = addtomusic(tmp->expr->cell.car, add);
+            tmp = (tmp->expr->cell.cdr);
+         }
+         return tmp;
+      case MUSIQUE:
+         tmp = musique->expr->musique.liste;
+         while(tmp->expr->cell.cdr != NULL){
+            if (tmp->expr->cell.car != NULL)
+              tmp->expr->cell.car->expr->note.valeur += add;
+            tmp = (tmp->expr->cell.cdr);
+         }
+         return musique;
+      default: assert(0);
+   }
+}
+
+struct expr *multtomusic (struct expr *musique, int mult){
+         struct expr *tmp = musique;
+      switch(musique->type){
+      case CELL:
+         if (tmp == NULL)
+            return tmp;
+         while(tmp->expr->cell.cdr != NULL){
+            if (tmp->expr->cell.car != NULL)
+              tmp->expr->cell.car = multtomusic(tmp->expr->cell.car, mult);
+            tmp = (tmp->expr->cell.cdr);
+         }
+         return tmp;
+      case MUSIQUE:
+         tmp->expr->musique.dureenum = tmp->expr->musique.dureenum * mult;
+         return tmp;
+
+         default: assert(0);
+   }
+}
+
+struct expr *divtomusic (struct expr *musique, int div){
+         struct expr *tmp = musique;
+      switch(musique->type){
+      case CELL:
+         if (tmp == NULL)
+            return tmp;
+         while(tmp->expr->cell.cdr != NULL){
+            if (tmp->expr->cell.car != NULL)
+              tmp->expr->cell.car = divtomusic(tmp->expr->cell.car, div);
+            tmp = (tmp->expr->cell.cdr);
+         }
+         return tmp;
+      case MUSIQUE:
+         tmp->expr->musique.dureenum = tmp->expr->musique.dureeden * div;
+         return tmp;
+
+         default: assert(0);
+   }
 }
 
 void print_bezier(struct expr *bezier){
@@ -752,8 +838,10 @@ void step(struct configuration *conf){
 
       int k1, k2;
       struct expr * e1 = conf->closure->expr;
-      struct expr * c1,* c2,* m1;
+      struct expr * c1,* c2;
       char * ch1,* ch2;
+      int ismusique = 0;
+      int iscell = 0;
 
 
       if(conf->closure->expr->type == NUM){
@@ -779,10 +867,13 @@ void step(struct configuration *conf){
   c1 = conf->closure->expr;
       }
       if(conf->closure->expr->type == MUSIQUE){
-  m1 = conf->closure->expr;
+  c1 = conf->closure->expr;
+  ismusique = 1;
       }
       if(conf->closure->expr->type == CELL){
          c1 = conf->closure->expr;
+         iscell = 1;
+
 
   switch(expr->expr->op){
   case HEAD: conf->closure = mk_closure(mk_head(conf->closure->expr),NULL); return;
@@ -805,25 +896,37 @@ void step(struct configuration *conf){
 
       if(conf->closure->expr->type == NUM){
   k2 = get_num(conf);
+  if (ismusique || iscell){
+     switch (expr->expr->op){
+        case PLUS:  conf->closure = mk_closure(addtomusic(c1,k2),NULL);return;
+        case MINUS: conf->closure = mk_closure(addtomusic(c1,-k2),NULL);return;
+     case MULT:  conf->closure = mk_closure(multtomusic(c1,k2),NULL);return;
+        case DIV:   assert(k2!=0);
+           conf->closure = mk_closure(divtomusic(c1,k2),NULL);return;
+        default : ;
+     }
+  }
+  else{
   switch (expr->expr->op){
-  case SETABS:   conf->closure = mk_closure(set_abs(c1,k2),NULL);return;
-  case SETORD:   conf->closure = mk_closure(set_ord(c1,k2),NULL);return;
-  case SETRAYON: conf->closure = mk_closure(set_rayon(c1,k2),NULL);return;
+     case SETABS:   conf->closure = mk_closure(set_abs(c1,k2),NULL);return;
+     case SETORD:   conf->closure = mk_closure(set_ord(c1,k2),NULL);return;
+     case SETRAYON: conf->closure = mk_closure(set_rayon(c1,k2),NULL);return;
 
-  case PLUS:  conf->closure = mk_closure(mk_int(k1 + k2 ),NULL);return;
-  case MINUS: conf->closure = mk_closure(mk_int(k1 - k2 ),NULL);return;
-  case MULT:  conf->closure = mk_closure(mk_int(k1 * k2 ),NULL);return;
-  case DIV:   assert(k2!=0);
-    conf->closure = mk_closure(mk_int(k1 /  k2),NULL);return;
-  case MOD:   conf->closure = mk_closure(mk_int(k1 %  k2),NULL);return;
-  case LEQ:   conf->closure = mk_closure(mk_int(k1 <= k2),NULL);return;
-  case LE:    conf->closure = mk_closure(mk_int(k1 <  k2),NULL);return;
-  case GEQ:   conf->closure = mk_closure(mk_int(k1 >= k2),NULL);return;
-  case GE:    conf->closure = mk_closure(mk_int(k1 >  k2),NULL);return;
-  case EQ:    conf->closure = mk_closure(mk_int(k1 == k2),NULL);return;
-  case OR:    conf->closure = mk_closure(mk_int(k1 || k2),NULL);return;
-  case AND:   conf->closure = mk_closure(mk_int(k1 && k2),NULL);return;
-  default:    ;
+     case PLUS:  conf->closure = mk_closure(mk_int(k1 + k2 ),NULL);return;
+     case MINUS: conf->closure = mk_closure(mk_int(k1 - k2 ),NULL);return;
+     case MULT:  conf->closure = mk_closure(mk_int(k1 * k2 ),NULL);return;
+     case DIV:   assert(k2!=0);
+        conf->closure = mk_closure(mk_int(k1 /  k2),NULL);return;
+     case MOD:   conf->closure = mk_closure(mk_int(k1 %  k2),NULL);return;
+     case LEQ:   conf->closure = mk_closure(mk_int(k1 <= k2),NULL);return;
+     case LE:    conf->closure = mk_closure(mk_int(k1 <  k2),NULL);return;
+     case GEQ:   conf->closure = mk_closure(mk_int(k1 >= k2),NULL);return;
+     case GE:    conf->closure = mk_closure(mk_int(k1 >  k2),NULL);return;
+     case EQ:    conf->closure = mk_closure(mk_int(k1 == k2),NULL);return;
+     case OR:    conf->closure = mk_closure(mk_int(k1 || k2),NULL);return;
+     case AND:   conf->closure = mk_closure(mk_int(k1 && k2),NULL);return;
+     default:    ;
+  }
   }
       }
 
@@ -847,7 +950,7 @@ void step(struct configuration *conf){
   case APPEND: conf->closure = mk_closure(mk_append(c1,c2),NULL);return;
   case HEADN:  conf->closure = mk_closure(mk_headn(c2,e1),NULL);return;
   case EQ:     conf->closure = mk_closure(mk_int(list_equal(c1,c2)),NULL);return;
-  case SETLIST: conf->closure = mk_closure(set_list(m1,c2),NULL);return;
+     case SETLIST: assert(ismusique);conf->closure = mk_closure(set_list(c1,c2),NULL);return;
   default:     ;
   }
       }
@@ -871,7 +974,7 @@ void step(struct configuration *conf){
       if (conf->closure->expr->type==TONIQUE){
          ch2 = conf->closure->expr->expr->id;
          switch (expr->expr->op){
-            case TRANS: conf->closure = mk_closure(transposition(m1, ch1, ch2),NULL); return;
+            case TRANS: assert(ismusique); conf->closure = mk_closure(transposition(c1, ch1, ch2),NULL); return;
             default : ;
          }
       }
