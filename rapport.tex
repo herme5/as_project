@@ -61,15 +61,16 @@ Le if ne nous à pas posé de problèmes, avec la simple règle "e: T\_IF e T\_T
 
 \section{Fonctions}
 \subsection{Fonctions avec un paramètre}
-%TODO
 
+Pour créer une fonction avec un paramètre, la règle "e : T\_FUN T\_ID T\_ARROW e" est suffisante avec T\_ARROW associatif à droite avec la même priorité que T\_ELSE. On peut donc écrire une fonction comme ceci : "fun x -> x+4".
+On appelle mk\_fun avec comme premier paramètre la chaine de caractères correspondant à l'ID et l'expression après les flèche.
 
 \subsection{Fonctions avec plusieurs paramètres}
-%TODO
 
+Avant d'enlever les parenthèses, nous n'avons pas eu besoin de créer de nouvelles règles pour les fonctions de plusieurs paramètres, il suffisait d'écrire une fonction comme ceci : "fun x ->(fun y -> x + y)", nous pouvions également écrire "fun x -> fun y -> x + y" car nous avions déjà choisi de ne pas mettre le parenthèses autour de la déclaration d'une fonction.
 
-\section{Enlever les parentheses}
-\subsection{Création de fonctions}
+\section{Enlever les parenthèses}
+\subsection{Déclaration de fonctions}
 %TODO
 \subsection{Applications de fonctions}
 %TODO
@@ -80,6 +81,7 @@ Le if ne nous à pas posé de problèmes, avec la simple règle "e: T\_IF e T\_T
 %TODO
 
 \part{Ajout des listes}
+%ne pas oublier de parler du bug qui empechait de créer une liste de plus de 2 éléments à cause de sa structure -> il fallait mettre une liste dans le cdr. (voir mail du prof)
 %TODO
 
 \part{Génération de dessins}
@@ -98,7 +100,7 @@ Le if ne nous à pas posé de problèmes, avec la simple règle "e: T\_IF e T\_T
 \subsection{Transformations}
 %TODO
 
-chapter*{Conclusion}
+\chapter*{Conclusion}
 %TODO
 
 \end{document}
