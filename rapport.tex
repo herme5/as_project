@@ -19,28 +19,74 @@
 \tableofcontents
 
 \chapter*{Introduction}
+%TODO
 
 \part{Construction de base}
 
 \section{Calculatrice}
-\subsection{Sous-section 1}
+
+Nous avons commencé par reprendre une partie du code de notre calculatrice vue en TP pour tout ce qui est plus moins ID etc... Et nous avons modifié notre parser.y pour utiliser les fonctions de machine.c et les structures de expr.h.\\
+Notre lex fonctionne comme ceci :\\
+Si on voit des nombres, on passe le nombre dans yylval.num pour le récupérer dans parser.y et on renvoie le token T\_NUM,\\
+Si on voit un ID (suite de caractère commençant par une lettre suivi par une suite de chiffres lettres et/ou underscore) on le sauvegarde dans yylval.id et on renvoie le token T\_ID.
+Pour les symboles, ('+', '-', '*', '=', '(', ')', '[', ']', '\%', '\{', '\}') nous renvoyons directement le symbole.\\
+Pour chaque mot clé (let par exemple) ou les symboles de comparaison, nous avons créé un token.\\
+\\
+Du côté de notre grammaire, nous avons choisi un label 'e' pour tous nos objets.
+Nous utilisons le label 's' pour une expression complète avec un ';'.\\
+Les règles de s à cette étape du projet sont :
+s : s EOE (on ne fait rien, EOE est un ;, cela veut dire que nous avons un ';' tout seul après une expression.
+s : s e EOE (pour évaluer et afficher e)
+s : s T\_LET T\_ID '=' e EOE (que nous allons voir dans la prochaine partie).
 
 \section{Let}
 
+Pour utiliser le let, nous utilisons les variables globales suivantes :\\
+- struct env *environment = NULL;\\
+- struct configuration conf\_concrete;\\
+- struct configuration*conf = \&conf\_concrete;\\
+Nous avons au début utilisé seulement la fonction push\_rec\_env comme ceci :
+\begin{verbatim}
+environment = push_rec_env($var,$expr,environment);
+struct closure * cl = mk_closure($expr,environment);
+conf->closure = cl;
+conf->stack = NULL;
+\end{verbatim}
+Avec \$var notre ID et \$expr notre 'e'.
+
+
 \section{If}
 
+Le if ne nous à pas posé de problèmes, avec la simple règle "e: T\_IF e T\_THEN e T\_ELSE e" et en mettant T\_ELSE associatif à droite avec une faible priorité, cela ne nous a créé aucun conflit et nous n'avons jamais mis de parenthèses autour d'un if.
+
 \section{Fonctions}
+\subsection{Fonctions avec un paramètre}
+%TODO
+
+
+\subsection{Fonctions avec plusieurs paramètres}
+%TODO
+
 
 \section{Enlever les parentheses}
-
-\section{Moins unaire}
+\subsection{Création de fonctions}
+%TODO
+\subsection{Applications de fonctions}
+%TODO
+\subsection{Moins unaire}
+%TODO
 
 \section{Let rec}
+%TODO
 
 \part{Ajout des listes}
+%TODO
 \part{Génération de dessins}
+%TODO
 \part{Génération de fichiers musicaux}
+%TODO
 
 chapter*{Conclusion}
+%TODO
 
 \end{document}
