@@ -461,6 +461,26 @@ struct expr *divtomusic (struct expr *musique, int div){
    }
 }
 
+struct expr *invmusic (struct expr *musique){
+  struct expr *tmp = musique;
+  switch(musique->type){
+    case CELL:
+        if (tmp == NULL)
+          return tmp;
+        while(tmp->expr->cell.cdr != NULL){
+          if (tmp->expr->cell.car != NULL)
+            tmp->expr->cell.car = invmusic(tmp->expr->cell.car);
+          tmp = (tmp->expr->cell.cdr);
+        }
+        tmp = mk_reverse(tmp, mk_cell(NULL, NULL));
+        return tmp;
+    case MUSIQUE:
+      tmp->expr->musique.liste = mk_reverse(tmp->expr->musique.liste, mk_cell(NULL, NULL));
+      return tmp;
+    default: assert(0);
+  }
+}
+
 void print_bezier(struct expr *bezier){
    printf("(");
    print_expr(bezier->expr->bezier.point1);
@@ -869,6 +889,10 @@ void step(struct configuration *conf){
       if(conf->closure->expr->type == MUSIQUE){
   c1 = conf->closure->expr;
   ismusique = 1;
+    switch(expr->expr->op){
+  case INV: conf->closure = mk_closure(invmusic(conf->closure->expr),NULL); return;
+  default: ;
+      }
       }
       if(conf->closure->expr->type == CELL){
          c1 = conf->closure->expr;

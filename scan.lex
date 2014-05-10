@@ -48,6 +48,7 @@ draw {return T_DRAW;}
 print {return T_PRINT;}
 
 trans {return T_TRANS;}
+inv {return T_INV;}
 
 <INITIAL>"/*"     {BEGIN COM;}
 <INITIAL>"//".*\n {;}

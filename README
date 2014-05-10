@@ -1,0 +1,37 @@
+README :
+Pour la compilation :
+make : compile et lance l'executable sur exemples.input
+make parser : compile sans lancer l'executable
+Pour lancer l'exécutable : ./parser
+
+Syntaxe :
+
+Listes :
+[1,2,3] -> crée la liste contenant 1 2 et 3
+[] -> crée la liste vide
+3::l-> crée une liste avec comme premier élément 3 avec l pour suivant
+head l -> renvoie le premier élément de l
+tail l -> renvoie une copie de l sans le premier élément
+
+//A METTRE DANS LE RAPPORT : nous avons codé append et reverse mais nous ne les avons pas rendu utilisables dans le code car elles sont facilement codables avec le langage.
+
+Dessins :
+{a,b} -> crée un point avec a et b comme coordonnées /!\ si l'expression de la première coordonnée du point commence par une parenthèse, il faut mettre un espace entre l'accolade ouvrante et la parenthèse ouvrante, sinon le langage essayera de créer une musique et il y aura une erreur de syntaxe /!\
+cercle(a,b) -> crée un cercle avec comme centre le point a et de rayon b
+bezier(a,b,c,d) -> crée une courbe de bezier avec les points a b c et d
+translation(a,b) -> crée une copie de a translaté selon le vecteur b
+rotation(a,b,c) -> crée une copie de a par la rotation de centre b et de rayon c (en degré)
+homotethie(a,b,c) -> crée une copie de a par l'homotethie de centre b et de rapport c
+draw(a) -> écrit dans le fichier canvas.js le code correspondant au dessin de a, pour dessiner plusieurs formes, il suffit d'appeler draw plusieurs fois, lorsque l'exécutable est relancé, le premier appel de draw efface les anciens dessins.
+Pour afficher les dessins, il suffit d'ouvrir le fichier html_code.html
+
+Musique :
+{(1,2),Re4M,1/2} -> crée une partition contenant les 1e et 2e notes de la gamme Re4 majeure, chaque note mesure 1/2 temps
+(trans m Re4M Sol4M) -> transpose la partition de m de la gamme Re4M à la gamme Sol4M (ou du nombre de notes d'écart)
+let Z = X Y -> Z est une musique qui jouera successivement la musique X et la musique Y
+X + 2 -> modifie les notes de X (ajoute 2 à chaque note)
+X * 2 -> multiplie la durée unitaire d'une note de X par 2
+(inv M) -> inverse la musique M
+print(L) -> avec L une liste de musique, écris les musique de L dans le fichier musique.ly
+
+Pour afficher la partition ou écouter la musique sur un ordinateur ayant lilypond, il faut excécuter la commande "lilypond musique.ly", qui créera 2 fichiers, un pdf avec la partition et un fichier midi avec le son. Avec les musiques créées par le fichier exemples.input, vous pourrez apprécier l'intro à la basse de "dance dance" par fall out boy (joué sur un piano), et quelques notes de la lettre à Elise de Beethoven

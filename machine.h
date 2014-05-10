@@ -68,3 +68,4 @@ struct expr *transposition (struct expr *musique, char* tonique1, char* tonique2
 struct expr *addtomusic (struct expr *musique, int add);
 struct expr *multtomusic (struct expr *musique, int mult);
 struct expr *divtomusic (struct expr *musique, int div);
+struct expr *invmusic (struct expr *musique);

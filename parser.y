@@ -68,6 +68,7 @@ struct env *get_env(){
 %token<info2> T_INFO2
 %token T_SPACE
 %token T_TRANS
+%token T_INV
 
 
 %type<t_exp> e
@@ -224,6 +225,7 @@ e : e '+' e   {$$ = mk_app(mk_app(mk_op(PLUS),$1),$3);}
 /*MUSIQUE*/
 | musique {$$ = $1;}
 | '('T_TRANS e T_ID T_ID')' {$$ = mk_app(mk_app(mk_app(mk_op(TRANS),$3),mk_tonique($4)),mk_tonique($5));}
+| '('T_INV e')' {$$ = mk_app(mk_op(INV),$3);}
 
 ;
 

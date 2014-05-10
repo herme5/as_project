@@ -22,4 +22,4 @@ parser.result: parser exemples.input
 .PHONY: clean
 
 clean:
-	rm -f *.o core *~ *.tab.h *.yy.c *.tab.c *.output parser *.html *.js
+	rm -f *.o core *~ *.tab.h *.yy.c *.tab.c *.output parser *.html *.js musique.ly musique.pdf musique.midi
