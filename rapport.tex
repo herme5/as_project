@@ -100,7 +100,7 @@ Nous avons quand même essayé d'enlever toutes les parenthèses, pour cela nous
 Nous avons essayé de gérer le moins unaire avec une règle de priorité spéciale (en utilisant le mot clé prec) mais cela n'a pas fonctionné, nous avons donc décidé que tous les moins unaires seraient parenthésés (par exemple pour appliquer la fonction f à 2 et -3, il faut écrire "(f 2 (-3))" ).
 
 \section{Let rec}
-Après plusieurs tests avec notre version qui n'utilisait que la fonction push\_rec\_env, nous nous sommes rendu compte que nous ne pouvions pas modifier la valeur d'une variable en fonction de son ancienne valeur, nous avons donc décidé de créer un token T\_REC, pour créer une variable récursivement, il faut donc écrire "let rec f = ...", ceci utilise la fonction push\_rec\_env de la façon décrite dans le paragraphe sur le let. Le let "normal" utilise donc désormais la fonction push\env de la façon suivante :
+Après plusieurs tests avec notre version qui n'utilisait que la fonction push\_rec\_env, nous nous sommes rendu compte que nous ne pouvions pas modifier la valeur d'une variable en fonction de son ancienne valeur, nous avons donc décidé de créer un token T\_REC, pour créer une variable récursivement, il faut donc écrire "let rec f = ...", ceci utilise la fonction push\_rec\_env de la façon décrite dans le paragraphe sur le let. Le let "normal" utilise donc désormais la fonction push\_env de la façon suivante :
 \begin{verbatim}
 struct closure * cl = mk_closure($expr,environment);
 conf->closure = cl;
@@ -115,14 +115,14 @@ Après avoir modifié la fonction step et créé les fonctions adéquates pour l
 Nous créons les listes récursivement de la même façon que pour les fonctions en commençant par créer la liste vide et nous ajoutons en tête les éléments un par un.\\
 Les règles sont les suivantes :\\
 list: '[' l {\$\$ = \$2;}\\
-l : e ']'   {\$\$ = mk\_app(mk_app(mk_op(CONS),\$1),mk_cell(NULL, NULL));}\\
-| e',' l    {\$\$ = mk\_app(mk_app(mk_op(CONS),\$1),\$3);}\\
+l : e ']'   {\$\$ = mk\_app(mk\_app(mk\_op(CONS),\$1),mk\_cell(NULL, NULL));}\\
+| e',' l    {\$\$ = mk\_app(mk\_app(mk\_op(CONS),\$1),\$3);}\\
 |']'        {\$\$ = mk\_cell(NULL, NULL);}\\
 \\
 Lorsque nous avons testé les listes, nous nous sommes rendu compte que nous ne pouvions pas créer des listes de plus de deux éléments, et cela car le type du cdr était struct cell *, ce qui posait des problèmes lors de l'évalutation, car la machine ne peut évaluer que des struct expr *. Pour régler ce problème, nous avons mis dans le cdr un struct expr * contenant la liste. (Cette solution a été trouvée par Sylvain Salvati et nous a été donnée par mail le vendredi 4 avril)\\
 \\
 Nous avons aussi créé 3 fonctions que nous avons décidé de ne pas laisser dans le parser. La première est la fonction headn qui renvoie le n-ième élément d'une liste, la seconde est la fonction append qui concatène deux listes, qui elle même utilise la fonction reverse qui renvoie la liste du dernier au premier élément.
-
+x
 \part{Génération de dessins}
 \subsection{Dans la structure}
 
@@ -134,22 +134,22 @@ Nous avons choisi de faire de même pour les cercles et les courbes de bezier. P
 
 Une fois les structures au point, nous avons écrit les transformations, comme toujours en modifiant machine.c et en créant les fonctions adéquates.\\
 Les fonctions de transformation sont la translation, la rotation et l'homotethie. Dans le bison nous avons utilisé les règles suivantes :\\
-e: T_TRANSLAT '(' e ',' e ')'    {\$\$ = mk_app(mk_app(mk_op(TRANSLATION),\$3),\$5);}\\
-|  T_ROTAT '(' e ',' e ',' e ')' {\$\$ = mk_app(mk_app(mk_app(mk_op(ROTATION),\$3),\$5),\$7);}\\
-|  T_HOMOT '(' e ',' e ',' e ')' {\$\$ = mk_app(mk_app(mk_app(mk_op(HOMOTHETIE),\$3),\$5),\$7);}\\
+e: T\_TRANSLAT '(' e ',' e ')'    {\$\$ = mk\_app(mk\_app(mk\_op(TRANSLATION),\$3),\$5);}\\
+|  T\_ROTAT '(' e ',' e ',' e ')' {\$\$ = mk\_app(mk\_app(mk\_app(mk\_op(ROTATION),\$3),\$5),\$7);}\\
+|  T\_HOMOT '(' e ',' e ',' e ')' {\$\$ = mk\_app(mk\_app(mk\_app(mk\_op(HOMOTHETIE),\$3),\$5),\$7);}\\
 \\
 Nous avons écrit une fonction par transformation, qui teste d'abord le type, et effectue ensuite les transformations adéquates.
 
 \subsection{Affichage}
 
-Pour afficher les dessins, il fallait créer un fichier .js pour creer le canvas en javascript, nous avons donc créé des fonctions dans un fichier js_writer.c pour écrire dans un fichier "html_code.html" le code html d'affichage du javascript et dans un fichier "canvas.js" le code du javascript. Dans la fonction js_write, si la variable globale init est nulle, nous créons le fichier (ou l'ouvrons en écriture seule si celui ci existe déjà de façon à le remplacer), et si celle ci est à 1, nous écrivons au milieu du fichier pour ajouter les dessins sans supprimer les autres.\\
+Pour afficher les dessins, il fallait créer un fichier .js pour creer le canvas en javascript, nous avons donc créé des fonctions dans un fichier js\_writer.c pour écrire dans un fichier "html\_code.html" le code html d'affichage du javascript et dans un fichier "canvas.js" le code du javascript. Dans la fonction js\_write, si la variable globale init est nulle, nous créons le fichier (ou l'ouvrons en écriture seule si celui ci existe déjà de façon à le remplacer), et si celle ci est à 1, nous écrivons au milieu du fichier pour ajouter les dessins sans supprimer les autres.\\
 Par appel de la fonction draw, les fichiers sont créés et les dessins sont affichés dans la page html.
 
 \part{Génération de fichiers musicaux}
 \subsection{Dans la structure}
 
 Pour la musique, nous avons créé une structure contenant une liste de notes (toujours struct expr *), une tonique (char *), et deux int pour la durée (numerateur et denominateur pour ne pas casser la fraction, celle ci est simplifiée au moment de l'affichage).\\
-Nous avons aussi créé une structure pour les notes, contenant un int (la valeur) et deux char *, info1 et info2. Le premier contient soit b si la note est un bemol, soit # si la note est un dièse et '\0' sinon. Le second contient des '-' ou des '.' pour donner la longueur de la note. Nous avons utilisé le tiret normal et non le tiret semi-cadratin car le tiret semi-cadratin ne peut pas être parsé en char car c'est un double caractère.\\
+Nous avons aussi créé une structure pour les notes, contenant un int (la valeur) et deux char *, info1 et info2. Le premier contient soit b si la note est un bemol, soit \# si la note est un dièse et '\\0' sinon. Le second contient des '-' ou des '.' pour donner la longueur de la note. Nous avons utilisé le tiret normal et non le tiret semi-cadratin car le tiret semi-cadratin ne peut pas être parsé en char car c'est un double caractère.\\
 Pour la création de musique, nous avons créé un token qui est renvoyé par le lex lorsque l'on écrit '{(', pour savoir quand une musique commence. Ceci peut être génant lors de la création d'un point, si par exemple le premier élément d'un point est un appel de fonction (f 3) par exemple, on ne peut plus écrire {(f 3),3} mais il faut écrire { (f 3), 3} pour pas rentrer dans le mode musique dans le lex.\\
 Il y a trois nouveaux modes dans le lex : le mode NOTES, qui est démarré après '{(' et qui renvoie les notes de la liste; le mode NOTESNEG, qui gère les notes en négatif (biensur mises entre parenthèses); et le mode MUSIQUE, qui renvoie le char * correspondant à la tonique et le ou les int correspondant à la durée d'une note et le caractère '/' si nécessaire.
 
